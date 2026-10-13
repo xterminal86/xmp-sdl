@@ -1,0 +1,23 @@
+build*/
+obj/
+venv/
+dumb-compile/build/
+dumb-compile/CMakeFiles/
+.vs/
+.idea/
+CMakeLists.txt.user*
+CMakeSettings.json
+nrogue
+save.nrg
+core.*
+*.txt
+!config-template.txt
+!SDL2 QT Creator config.txt
+!CMakeLists.txt
+!tests/README.txt
+!utils/maps/*.txt
+!/CREDITS.md
+!resources/README.txt
+*.out
+*.exe
+/*.bmp
