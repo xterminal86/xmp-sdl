@@ -4,20 +4,22 @@
 //
 // *****************************************************************************
 
-// test2
+#include <filesystem>
+#include <vector>
+#include <string>
 
 #include "printer.h"
+#include "structs.h"
+#include "utils.h"
 
-#include "xmp.h"
-
-#include <filesystem>
+#include <xmp.h>
 
 namespace fs = std::filesystem;
 
 TG::Printer Printer;
 
-const size_t kWindowWidth  = 400;
-const size_t kWindowHeight = 400;
+const size_t kWindowWidth  = 800;
+const size_t kWindowHeight = 600;
 
 std::string DroppedFile = "<drag and drop a file>";
 
@@ -25,12 +27,7 @@ SDL_bool TopFlag = SDL_FALSE;
 
 xmp_context XmpContext;
 
-struct PlaylistItem
-{
-  std::string URI;
-  std::string SongTitle;
-  std::string SongType;
-};
+std::vector<PlaylistItem> Playlist;
 
 SDL_AudioDeviceID AudioDevice;
 
@@ -61,42 +58,20 @@ void RefreshList()
       std::string uri = entry.path().string();
       if (fs::is_regular_file(uri))
       {
-        SDL_Log("%s", uri.data());
+        PlaylistItem item;
+        if (Utils::GetModuleInfo(uri, item))
+        {
+          Playlist.push_back(item);
+        }
       }
     }
   }
   else if (fs::is_regular_file(DroppedFile))
   {
-    xmp_test_info ti;
-    int ec = xmp_test_module(DroppedFile.data(), &ti);
-    switch (ec)
+    PlaylistItem item;
+    if (Utils::GetModuleInfo(DroppedFile, item))
     {
-      case 0:
-      {
-        PlaylistItem item;
-        item.URI = DroppedFile;
-        item.SongTitle = ti.name;
-        item.SongType  = ti.type;
-        TryToPlay(item);
-      }
-      break;
-
-      case -XMP_ERROR_FORMAT:
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unrecognized file format!");
-        break;
-
-      case -XMP_ERROR_DEPACK:
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "File uncompression failed!");
-        break;
-
-      case -XMP_ERROR_SYSTEM:
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "System error! errno = %d ('%s')",
-                     errno, strerror(errno));
-        break;
-
-      default:
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Unhandled error code %d", ec);
-        break;
+      Playlist.push_back(item);
     }
   }
 }
@@ -107,11 +82,29 @@ void Display()
 {
   Printer.Clear();
 
-  Printer.PrintFB(0, 0, DroppedFile, TG::Printer::kAlignLeft, TG::Colors::White);
+  for (size_t i = 0; i < 60; i++)
+  {
+    Printer.PrintFB(i,
+                    0,
+                    std::to_string((i % 10)),
+                    TG::Printer::kAlignLeft,
+                    TG::Colors::White);
+  }
+
+  Printer.PrintFB(0,
+                  2,
+                  DroppedFile,
+                  TG::Printer::kAlignLeft,
+                  TG::Colors::White);
 
   if (TopFlag == SDL_TRUE)
   {
-    Printer.PrintFB(0, 1, "TOP", TG::Printer::kAlignLeft, TG::Colors::Yellow);
+    Printer.PrintFB(45,
+                    1,
+                    "T",
+                    TG::Printer::kAlignLeft,
+                    TG::Colors::Yellow,
+                    TG::Colors::Red);
   }
 
   Printer.Render();
@@ -133,7 +126,9 @@ void AudioCallback(void* udata, unsigned char* stream, int len)
 
     case -XMP_END:
     {
-      // Write silence to prevent tail playback.
+      //
+      // Write silence to prevent repeated playback of the tail.
+      //
       SDL_memset(stream, 0, len);
       StopPlaying = true;
     }
@@ -233,7 +228,16 @@ int main()
 
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-  if (!Printer.Init(renderer, kWindowWidth, kWindowHeight, 1.0))
+  SDL_DisplayMode sdm;
+  if (SDL_GetCurrentDisplayMode(0, &sdm) != 0)
+  {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", SDL_GetError());
+    return 1;
+  }
+
+  SDL_Log("%dx%d", sdm.w, sdm.h);
+
+  if (!Printer.Init(renderer, kWindowWidth, kWindowHeight, 2.0))
   {
     return 1;
   }

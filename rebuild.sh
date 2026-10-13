@@ -1,0 +1,10 @@
+#!/bin/bash
+
+BuildDir="cli-build"
+
+mkdir -p "${BuildDir}"
+cd "${BuildDir}" || exit 1
+rm -rf *
+cmake ../
+make
+

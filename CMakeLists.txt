@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-set (TARGET_NAME xmplay)
+set (TARGET_NAME xmplay-sdl)
 project (${TARGET_NAME})
 
 add_definitions(-DUSE_SDL)
@@ -21,4 +21,3 @@ find_package(SDL2 REQUIRED)
 find_package(libxmp REQUIRED)
 
 target_link_libraries(${TARGET_NAME} SDL2::SDL2 libxmp::xmp_shared)
-
