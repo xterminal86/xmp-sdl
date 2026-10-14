@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <vector>
 #include <string>
+#include <format>
 
 #include "printer.h"
 #include "structs.h"
@@ -16,10 +17,26 @@
 
 namespace fs = std::filesystem;
 
+uint64_t DrawTime = 0;
+
 TG::Printer Printer;
 
-const size_t kWindowWidth  = 800;
-const size_t kWindowHeight = 600;
+const size_t kGlobalScale = 2;
+
+//
+// In multiples of chars.
+//
+const size_t kCharWidth  =  8 * kGlobalScale;
+const size_t kCharHeight = 16 * kGlobalScale;
+
+const size_t kWindowCharWidth  = 40;
+const size_t kWindowCharHeight = 20;
+
+const size_t kWindowCharWidthVisible  = kWindowCharWidth  - 1;
+const size_t kWindowCharHeightVisible = kWindowCharHeight - 1;
+
+const size_t kWindowWidth  = kWindowCharWidth  * kCharWidth;
+const size_t kWindowHeight = kWindowCharHeight * kCharHeight;
 
 std::string DroppedFile = "<drag and drop a file>";
 
@@ -78,11 +95,9 @@ void RefreshList()
 
 // =============================================================================
 
-void Display()
+void DrawDimensionHints()
 {
-  Printer.Clear();
-
-  for (size_t i = 0; i < 60; i++)
+  for (size_t i = 0; i < kWindowCharWidth; i++)
   {
     Printer.PrintFB(i,
                     0,
@@ -91,21 +106,51 @@ void Display()
                     TG::Colors::White);
   }
 
-  Printer.PrintFB(0,
-                  2,
-                  DroppedFile,
-                  TG::Printer::kAlignLeft,
-                  TG::Colors::White);
+  for (size_t i = 0; i < kWindowCharHeight; i++)
+  {
+    Printer.PrintFB(0,
+                    i,
+                    std::to_string((i % 10)),
+                    TG::Printer::kAlignLeft,
+                    TG::Colors::White);
+  }
+}
+
+// =============================================================================
+
+void DrawFPS()
+{
+  Printer.PrintFB(kWindowCharWidthVisible + 1,
+                  kWindowCharHeightVisible,
+                  std::format(" {} ", DrawTime),
+                  TG::Printer::kAlignRight,
+                  TG::Colors::Yellow);
+}
+
+// =============================================================================
+
+void Display()
+{
+  Printer.Clear();
+
+  //DrawDimensionHints();
+
+  Printer.DrawWindow(
+    { 0, 0 },
+    { kWindowCharWidthVisible, kWindowCharHeightVisible }
+  );
 
   if (TopFlag == SDL_TRUE)
   {
-    Printer.PrintFB(45,
+    Printer.PrintFB(kWindowCharWidthVisible,
                     1,
                     "T",
                     TG::Printer::kAlignLeft,
                     TG::Colors::Yellow,
                     TG::Colors::Red);
   }
+
+  DrawFPS();
 
   Printer.Render();
 }
@@ -193,10 +238,18 @@ int main()
 
   SDL_Renderer* renderer = nullptr;
 
-  SDL_Window* window = SDL_CreateWindow("Printer test",
+  SDL_Window* window = SDL_CreateWindow("xmp-sdl music player",
                                         100, 100,
-                                        kWindowWidth, kWindowHeight,
+                                        kWindowWidth,
+                                        kWindowHeight,
                                         SDL_WINDOW_SHOWN);
+  if (window == nullptr)
+  {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                 "Failed to create SDL window: '%s'",
+                 SDL_GetError());
+    return 1;
+  }
 
   int drivers = SDL_GetNumRenderDrivers();
 
@@ -235,9 +288,10 @@ int main()
     return 1;
   }
 
-  SDL_Log("%dx%d", sdm.w, sdm.h);
+  SDL_Log("Window size: %dx%d", sdm.w, sdm.h);
+  SDL_Log("Window size (chars): %lux%lu", kWindowCharWidth, kWindowCharHeight);
 
-  if (!Printer.Init(renderer, kWindowWidth, kWindowHeight, 2.0))
+  if (!Printer.Init(renderer, kWindowWidth, kWindowHeight, kGlobalScale))
   {
     return 1;
   }
@@ -245,6 +299,10 @@ int main()
   SDL_Event evt;
 
   xmp_frame_info fi;
+
+  uint64_t drawTime = 0;
+
+  SDL_Log("%lux%lu", kWindowCharWidth, kWindowCharHeight);
 
   bool running = true;
   while (running)
@@ -307,7 +365,11 @@ int main()
       xmp_release_module(XmpContext);
     }
 
+    drawTime = SDL_GetTicks64();
+
     Display();
+
+    DrawTime = SDL_GetTicks64() - drawTime;
   }
 
   xmp_free_context(XmpContext);
