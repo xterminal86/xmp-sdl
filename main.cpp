@@ -29,7 +29,7 @@ const size_t kGlobalScale = 2;
 const size_t kCharWidth  =  8 * kGlobalScale;
 const size_t kCharHeight = 16 * kGlobalScale;
 
-const size_t kWindowCharWidth  = 40;
+const size_t kWindowCharWidth  = 80;
 const size_t kWindowCharHeight = 20;
 
 const size_t kWindowCharWidthVisible  = kWindowCharWidth  - 1;
@@ -78,6 +78,7 @@ void RefreshList()
         PlaylistItem item;
         if (Utils::GetModuleInfo(uri, item))
         {
+          item.Filename = entry.path().filename().string();
           Playlist.push_back(item);
         }
       }
@@ -120,9 +121,22 @@ void DrawDimensionHints()
 
 void DrawFPS()
 {
-  Printer.PrintFB(kWindowCharWidthVisible + 1,
+  Printer.PrintFB(0,
                   kWindowCharHeightVisible,
                   std::format(" {} ", DrawTime),
+                  TG::Printer::kAlignLeft,
+                  TG::Colors::Yellow);
+}
+
+// =============================================================================
+
+void DrawWindowSize()
+{
+  Printer.PrintFB(kWindowCharWidthVisible + 1,
+                  kWindowCharHeightVisible,
+                  std::format(" {}x{} ",
+                              kWindowCharWidthVisible,
+                              kWindowCharHeightVisible),
                   TG::Printer::kAlignRight,
                   TG::Colors::Yellow);
 }
@@ -140,6 +154,28 @@ void Display()
     { kWindowCharWidthVisible, kWindowCharHeightVisible }
   );
 
+  size_t index = 0;
+  for (;;)
+  {
+    if (Playlist.empty())
+    {
+      break;
+    }
+
+    Printer.PrintFB(1,
+                    1 + index,
+                    Playlist[index].Filename,
+                    TG::Printer::kAlignLeft,
+                    TG::Colors::White);
+
+    index++;
+
+    if ( (index >= kCharHeight - 1) || (index >= Playlist.size()) )
+    {
+      break;
+    }
+  }
+
   if (TopFlag == SDL_TRUE)
   {
     Printer.PrintFB(kWindowCharWidthVisible,
@@ -151,6 +187,7 @@ void Display()
   }
 
   DrawFPS();
+  DrawWindowSize();
 
   Printer.Render();
 }

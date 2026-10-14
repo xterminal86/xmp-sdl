@@ -6,6 +6,7 @@
 struct PlaylistItem
 {
   std::string URI;
+  std::string Filename;
   std::string SongTitle;
   std::string SongType;
 };
