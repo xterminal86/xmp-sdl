@@ -10,6 +10,8 @@
 #include <format>
 
 #include "printer.h"
+
+#include "constants.h"
 #include "structs.h"
 #include "utils.h"
 
@@ -20,23 +22,6 @@ namespace fs = std::filesystem;
 uint64_t DrawTime = 0;
 
 TG::Printer Printer;
-
-const size_t kGlobalScale = 2;
-
-//
-// In multiples of chars.
-//
-const size_t kCharWidth  =  8 * kGlobalScale;
-const size_t kCharHeight = 16 * kGlobalScale;
-
-const size_t kWindowCharWidth  = 80;
-const size_t kWindowCharHeight = 20;
-
-const size_t kWindowCharWidthVisible  = kWindowCharWidth  - 1;
-const size_t kWindowCharHeightVisible = kWindowCharHeight - 1;
-
-const size_t kWindowWidth  = kWindowCharWidth  * kCharWidth;
-const size_t kWindowHeight = kWindowCharHeight * kCharHeight;
 
 std::string DroppedFile = "<drag and drop a file>";
 
@@ -49,6 +34,18 @@ std::vector<PlaylistItem> Playlist;
 SDL_AudioDeviceID AudioDevice;
 
 bool StopPlaying = false;
+
+// =============================================================================
+
+void DummyData()
+{
+  for (size_t i = 0; i < 100; i++)
+  {
+    PlaylistItem item;
+    item.Filename = std::format("File {}", (i + 1));
+    Playlist.push_back(item);
+  }
+}
 
 // =============================================================================
 
@@ -98,7 +95,7 @@ void RefreshList()
 
 void DrawDimensionHints()
 {
-  for (size_t i = 0; i < kWindowCharWidth; i++)
+  for (size_t i = 0; i < Constants::WindowCharWidth; i++)
   {
     Printer.PrintFB(i,
                     0,
@@ -107,7 +104,7 @@ void DrawDimensionHints()
                     TG::Colors::White);
   }
 
-  for (size_t i = 0; i < kWindowCharHeight; i++)
+  for (size_t i = 0; i < Constants::WindowCharHeight; i++)
   {
     Printer.PrintFB(0,
                     i,
@@ -122,7 +119,7 @@ void DrawDimensionHints()
 void DrawFPS()
 {
   Printer.PrintFB(0,
-                  kWindowCharHeightVisible,
+                  Constants::WindowCharHeightVisible,
                   std::format(" {} ", DrawTime),
                   TG::Printer::kAlignLeft,
                   TG::Colors::Yellow);
@@ -132,13 +129,17 @@ void DrawFPS()
 
 void DrawWindowSize()
 {
-  Printer.PrintFB(kWindowCharWidthVisible + 1,
-                  kWindowCharHeightVisible,
-                  std::format(" {}x{} ",
-                              kWindowCharWidthVisible,
-                              kWindowCharHeightVisible),
-                  TG::Printer::kAlignRight,
-                  TG::Colors::Yellow);
+  Printer.PrintFB(
+    Constants::WindowCharWidthVisible + 1,
+    Constants::WindowCharHeightVisible,
+    std::format(
+      " {}x{} ",
+      Constants::WindowCharWidthVisible,
+      Constants::WindowCharHeightVisible
+    ),
+    TG::Printer::kAlignRight,
+    TG::Colors::Yellow
+  );
 }
 
 // =============================================================================
@@ -151,7 +152,10 @@ void Display()
 
   Printer.DrawWindow(
     { 0, 0 },
-    { kWindowCharWidthVisible, kWindowCharHeightVisible }
+    {
+      (int)Constants::WindowCharWidthVisible,
+      (int)Constants::WindowCharHeightVisible
+    }
   );
 
   size_t index = 0;
@@ -162,7 +166,7 @@ void Display()
       break;
     }
 
-    Printer.PrintFB(1,
+    Printer.PrintFB(2,
                     1 + index,
                     Playlist[index].Filename,
                     TG::Printer::kAlignLeft,
@@ -170,7 +174,7 @@ void Display()
 
     index++;
 
-    if ( (index >= kCharHeight - 1) || (index >= Playlist.size()) )
+    if ( (index >= Constants::CharHeight - 1) or (index >= Playlist.size()) )
     {
       break;
     }
@@ -178,7 +182,7 @@ void Display()
 
   if (TopFlag == SDL_TRUE)
   {
-    Printer.PrintFB(kWindowCharWidthVisible,
+    Printer.PrintFB(Constants::WindowCharWidthVisible,
                     1,
                     "T",
                     TG::Printer::kAlignLeft,
@@ -277,8 +281,8 @@ int main()
 
   SDL_Window* window = SDL_CreateWindow("xmp-sdl music player",
                                         100, 100,
-                                        kWindowWidth,
-                                        kWindowHeight,
+                                        Constants::WindowWidth,
+                                        Constants::WindowHeight,
                                         SDL_WINDOW_SHOWN);
   if (window == nullptr)
   {
@@ -326,9 +330,14 @@ int main()
   }
 
   SDL_Log("Window size: %dx%d", sdm.w, sdm.h);
-  SDL_Log("Window size (chars): %lux%lu", kWindowCharWidth, kWindowCharHeight);
+  SDL_Log("Window size (chars): %lux%lu",
+          Constants::WindowCharWidth,
+          Constants::WindowCharHeight);
 
-  if (!Printer.Init(renderer, kWindowWidth, kWindowHeight, kGlobalScale))
+  if (!Printer.Init(renderer,
+                    Constants::WindowWidth,
+                    Constants::WindowHeight,
+                    Constants::GlobalScale))
   {
     return 1;
   }
@@ -339,7 +348,10 @@ int main()
 
   uint64_t drawTime = 0;
 
-  SDL_Log("%lux%lu", kWindowCharWidth, kWindowCharHeight);
+  SDL_Log("%lux%lu", Constants::WindowCharWidth, Constants::WindowCharHeight);
+
+  // FIXME: remove
+  DummyData();
 
   bool running = true;
   while (running)
@@ -351,6 +363,19 @@ int main()
         case SDL_QUIT:
           running = false;
           break;
+
+        // ---------------------------------------------------------------------
+
+        case SDL_MOUSEBUTTONDOWN:
+        {
+          SDL_Log("%u [ %d ; %d ]",
+                  evt.button.button,
+                  evt.button.x,
+                  evt.button.y);
+        }
+        break;
+
+        // ---------------------------------------------------------------------
 
         case SDL_KEYDOWN:
         {
@@ -375,15 +400,20 @@ int main()
         }
         break;
 
+        // ---------------------------------------------------------------------
+
         case SDL_DROPFILE:
         {
           DroppedFile = evt.drop.file;
 
           SDL_free(evt.drop.file);
 
-          RefreshList();
+          // FIXME:
+          //RefreshList();
         }
         break;
+
+        // ---------------------------------------------------------------------
 
         default:
           break;
