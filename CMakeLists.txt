@@ -8,6 +8,12 @@ add_compile_options(-Wfatal-errors)
 add_compile_options(-Werror=return-type)
 add_compile_options(-fmax-errors=1)
 
+if (${CMAKE_BUILD_TYPE} MATCHES Release)
+  add_definitions(-DRELEASE_BUILD)
+else()
+  add_definitions(-DDEBUG_BUILD)
+endif()
+
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
                   ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 

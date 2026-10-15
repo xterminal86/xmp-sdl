@@ -35,6 +35,11 @@ SDL_AudioDeviceID AudioDevice;
 
 bool StopPlaying = false;
 
+MouseInfo MouseClickData;
+
+int32_t MouseX = 0;
+int32_t MouseY = 0;
+
 // =============================================================================
 
 void DummyData()
@@ -114,6 +119,7 @@ void DrawDimensionHints()
   }
 }
 
+#ifdef DEBUG_BUILD
 // =============================================================================
 
 void DrawFPS()
@@ -141,6 +147,35 @@ void DrawWindowSize()
     TG::Colors::Yellow
   );
 }
+
+// =============================================================================
+
+void DrawMouseInfo()
+{
+  Printer.PrintFB(
+    Constants::WindowCharWidthVisible + 1,
+    0,
+    std::format(
+      " x: {} y: {} cx: {} cy: {} {} ",
+      MouseClickData.X,
+      MouseClickData.Y,
+      MouseClickData.CharPosX,
+      MouseClickData.CharPosY,
+      (MouseClickData.WasDoubleClick ? "DBL" : " - ")
+    ),
+    TG::Printer::kAlignRight,
+    TG::Colors::Yellow
+  );
+
+  Printer.PrintFB(
+    Constants::WindowCharWidthVisible + 1,
+    1,
+    std::format(" {} {} ", MouseX, MouseY),
+    TG::Printer::kAlignRight,
+    TG::Colors::Cyan
+  );
+}
+#endif
 
 // =============================================================================
 
@@ -174,7 +209,10 @@ void Display()
 
     index++;
 
-    if ( (index >= Constants::CharHeight - 1) or (index >= Playlist.size()) )
+    if (
+         (index >= Constants::WindowCharHeightVisible - 1)
+      or (index >= Playlist.size())
+    )
     {
       break;
     }
@@ -190,8 +228,11 @@ void Display()
                     TG::Colors::Red);
   }
 
+#ifdef DEBUG_BUILD
   DrawFPS();
   DrawWindowSize();
+  DrawMouseInfo();
+#endif
 
   Printer.Render();
 }
@@ -364,14 +405,29 @@ int main()
           running = false;
           break;
 
+        case SDL_MOUSEMOTION:
+        {
+          MouseX = evt.motion.x;
+          MouseY = evt.motion.y;
+        }
+        break;
+
         // ---------------------------------------------------------------------
 
         case SDL_MOUSEBUTTONDOWN:
         {
-          SDL_Log("%u [ %d ; %d ]",
-                  evt.button.button,
-                  evt.button.x,
-                  evt.button.y);
+          if (evt.button.timestamp - MouseClickData.Timestamp <= 250)
+          {
+            MouseClickData.WasDoubleClick = true;
+            MouseClickData.Timestamp = 0;
+          }
+          else
+          {
+            MouseClickData.Timestamp = evt.button.timestamp;
+            MouseClickData.WasDoubleClick = false;
+          }
+
+          Utils::GetMouseInfo(evt.button, MouseClickData);
         }
         break;
 
