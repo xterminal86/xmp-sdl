@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <string>
 
+#include <SDL2/SDL.h>
+
 struct PlaylistItem
 {
   std::string URI;
@@ -33,6 +35,11 @@ struct MouseInfo
   bool WasPressed     = false;
 
   Button MouseButton = Button::NONE;
+};
+
+struct AppSettings
+{
+  SDL_bool AlwaysOnTop = SDL_FALSE;
 };
 
 #endif // STRUCTS_H
