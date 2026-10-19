@@ -4,7 +4,11 @@
 
 Application::Application()
 {
-  _appStates[AppState::PLAYLIST] = std::make_unique<PlaylistState>(_appSettings);
+  _appStates[AppState::PLAYLIST] = std::make_unique<PlaylistState>(
+    _appSettings,
+    _printer,
+    _soundPlayer
+  );
 
   for (auto& kvp : _appStates)
   {
@@ -18,7 +22,6 @@ Application::~Application()
 {
   _appStates.clear();
 
-  xmp_free_context(_xmpContext);
   SDL_Quit();
 }
 
@@ -37,68 +40,9 @@ bool Application::InitSDL()
 
 // =============================================================================
 
-static void AudioCallback(void* udata, unsigned char* stream, int len)
-{
-  //
-  // NOTE: last argument is the loop count. 0 - means play forever.
-  // If not 0, module reaches XMP_END state after specified number of repeats.
-  //
-  int ec = xmp_play_buffer((xmp_context)udata, stream, len, 1);
-  switch (ec)
-  {
-    case 0:
-      break;
-
-    case -XMP_END:
-    {
-      //
-      // Write silence to prevent repeated playback of the tail.
-      //
-      SDL_memset(stream, 0, len);
-    }
-    break;
-
-    case -XMP_ERROR_STATE:
-      SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Not in playing state!");
-      break;
-
-    default:
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Unhandled error code %d", ec);
-      break;
-  }
-}
-
-// =============================================================================
-
-
 bool Application::InitSound()
 {
-  if ((_xmpContext = xmp_create_context()) == nullptr)
-  {
-    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "xmp_create_context()");
-    return false;
-  }
-
-  SDL_AudioSpec a;
-
-  a.freq     = 44100;
-  a.format   = (AUDIO_S16);
-  a.channels = 2;
-  a.samples  = 2048;
-  a.callback = AudioCallback;
-  a.userdata = _xmpContext;
-
-  _audioDevice = SDL_OpenAudioDevice(nullptr, 0, &a, nullptr, 0);
-  if (_audioDevice == 0)
-  {
-    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", SDL_GetError());
-    return false;
-  }
-
-  // TODO: check out other params, subsequently maybe move them to settings.
-  //xmp_set_player(_xmpContext, XMP_PLAYER_DEFPAN, 50);
-
-  return true;
+  return _soundPlayer.Init();
 }
 
 // =============================================================================
@@ -224,21 +168,9 @@ void Application::Run()
       _appStates[_currentState]->HandleEvent(_event);
     }
 
-    if (_stopPlaying)
-    {
-      _stopPlaying = false;
-
-      SDL_LockAudioDevice(_audioDevice);
-      SDL_PauseAudioDevice(_audioDevice, 1);
-      SDL_UnlockAudioDevice(_audioDevice);
-
-      xmp_end_player(_xmpContext);
-      xmp_release_module(_xmpContext);
-    }
-
     drawTime = SDL_GetTicks64();
 
-    _appStates[_currentState]->DrawStuff(&_printer);
+    _appStates[_currentState]->DrawStuff();
 
     _appStates[_currentState]->SetDrawTime(SDL_GetTicks64() - drawTime);
   }

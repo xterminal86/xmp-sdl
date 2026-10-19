@@ -1,7 +1,12 @@
 #ifndef PLAYLISTSTATE_H
 #define PLAYLISTSTATE_H
 
+#include <vector>
+#include <memory>
+
+#include "constants.h"
 #include "state-base.h"
+#include "list-box.h"
 
 class PlaylistState : public AppStateBase
 {
@@ -11,24 +16,29 @@ class PlaylistState : public AppStateBase
     void Init() override;
 
     void HandleEvent(const SDL_Event& evt) override;
-    void DrawStuff(TG::Printer* const printer) override;
+    void DrawStuff() override;
 
   private:
+    void DrawPlaylist();
+    void UpdatePlaylist();
+    void TryToPlay();
+
 #ifdef DEBUG_BUILD
-    void DrawFPS(TG::Printer* const printer);
-    void DrawWindowSize(TG::Printer* const printer);
-    void DrawMouseInfo(TG::Printer* const printer);
+    void DrawDimensions();
+    void DrawFPS();
+    void DrawWindowSize();
+    void DrawMouseInfo();
 #endif
-
-    void DrawPlaylist(TG::Printer* const printer, const size_t offset);
-    void RefreshList();
-
-    int _cursorPosY = -1;
-    size_t _playlistOffset = 0;
 
     std::vector<PlaylistItem> _playlist;
 
     std::string _droppedFile;
+
+    std::unique_ptr<ListBox<PlaylistItem>> _listBox;
+
+    size_t _listItemWidth = 0;
+
+    std::string _itemBackground;
 };
 
 #endif // PLAYLISTSTATE_H

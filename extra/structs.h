@@ -6,12 +6,16 @@
 
 #include <SDL2/SDL.h>
 
+#include <xmp.h>
+
 struct PlaylistItem
 {
   std::string URI;
   std::string Filename;
   std::string SongTitle;
   std::string SongType;
+
+  xmp_module_info ModuleInfo;
 };
 
 struct MouseInfo

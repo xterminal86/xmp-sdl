@@ -1,5 +1,7 @@
 #include "playlist-state.h"
 
+#include "sound-player.h"
+#include "printer.h"
 #include "constants.h"
 #include "utils.h"
 
@@ -17,12 +19,13 @@ const std::string kHighlighter(Constants::WindowCharWidthVisible - 2, ' ');
 
 void PlaylistState::Init()
 {
-  for (size_t i = 0; i < 30; i++)
-  {
-    PlaylistItem item;
-    item.Filename = std::format("File {}", (i + 1));
-    _playlist.push_back(item);
-  }
+  _listBox = std::make_unique<ListBox<PlaylistItem>>(
+    0, 0, 40, Constants::WindowCharHeightVisible
+  );
+
+  _listItemWidth = (_listBox->Transform().w - 1);
+
+  _itemBackground = std::string(_listItemWidth, ' ');
 }
 
 // =============================================================================
@@ -42,29 +45,25 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
 
     case SDL_MOUSEBUTTONDOWN:
     {
-      if (evt.button.timestamp - _mouseClickData.Timestamp <= 250)
+      if (evt.button.button == 1)
       {
-        _mouseClickData.WasDoubleClick = true;
-        _mouseClickData.Timestamp = 0;
-      }
-      else
-      {
-        _mouseClickData.Timestamp = evt.button.timestamp;
-        _mouseClickData.WasDoubleClick = false;
-      }
+        if (evt.button.timestamp - _mouseClickData.Timestamp <= 250)
+        {
+          _mouseClickData.WasDoubleClick = true;
+          _mouseClickData.Timestamp = 0;
 
-      Utils::GetMouseInfo(evt.button, _mouseClickData);
+          TryToPlay();
+        }
+        else
+        {
+          _mouseClickData.Timestamp = evt.button.timestamp;
+          _mouseClickData.WasDoubleClick = false;
+        }
 
-      bool mousePosCheck = (
-        _mouseClickData.CharPosX >= 1
-    and _mouseClickData.CharPosX <= Constants::WindowCharWidthVisible - 1
-    and _mouseClickData.CharPosY >= 1
-    and _mouseClickData.CharPosY <= Constants::WindowCharHeightVisible - 1
-      );
+        Utils::GetMouseInfo(evt.button, _mouseClickData);
 
-      if (mousePosCheck)
-      {
-        _cursorPosY = _mouseClickData.CharPosY;
+        int ind = _listBox->MouseToItemIndex(_mouseClickData);
+        SDL_Log("List box index = %d", ind);
       }
     }
     break;
@@ -76,37 +75,46 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
       switch(evt.key.keysym.sym)
       {
         // -----------------------------------------------------------------
+        // FIXME: debug
+        case SDLK_a:
+        {
+          size_t s = _listBox->GetListSize();
+
+          PlaylistItem item;
+
+          item.Filename = std::format("Item {}", s++);
+
+          _listBox->Add(item);
+        }
+        break;
+
+        case SDLK_RETURN:
+        case SDLK_RETURN2:
+        case SDLK_x:
+        {
+          TryToPlay();
+        }
+        break;
+
+        case SDLK_v:
+        {
+          _soundPlayerRef.Stop();
+        }
+        break;
 
         // -----------------------------------------------------------------
 
         case SDLK_DOWN:
         {
-          if (_cursorPosY == -1)
+          _listBox->SelectNextItem();
+
+          int curItem = _listBox->GetCurrentItemIndex();
+          if (curItem != -1 and curItem >= _listBox->GetBottomItemIndex())
           {
-            _cursorPosY = 1;
+            _listBox->ScrollDown();
           }
-          else
-          {
-            _cursorPosY++;
 
-            if (_cursorPosY <= 1)
-            {
-              _cursorPosY = 1;
-            }
-
-            if (_cursorPosY > Constants::WindowCharHeightVisible - 1)
-            {
-              if (_cursorPosY == Constants::WindowCharHeightVisible)
-              {
-                if (_playlistOffset + kPageMaxItems < (_playlist.size() - 1))
-                {
-                  _playlistOffset++;
-                }
-              }
-
-              _cursorPosY = Constants::WindowCharHeightVisible - 1;
-            }
-          }
+          SDL_Log("List box index = %d", curItem);
         }
         break;
 
@@ -114,24 +122,15 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
 
         case SDLK_UP:
         {
-          if (_cursorPosY == -1)
-          {
-            _cursorPosY = 1;
-          }
-          else
-          {
-            _cursorPosY--;
+          _listBox->SelectPreviousItem();
 
-            if (_cursorPosY < 1)
-            {
-              if (_playlistOffset > 0)
-              {
-                _playlistOffset--;
-              }
-
-              _cursorPosY = 1;
-            }
+          int curItem = _listBox->GetCurrentItemIndex();
+          if (curItem != -1 and curItem <= _listBox->GetTopItemIndex())
+          {
+            _listBox->ScrollUp();
           }
+
+          SDL_Log("List box index = %d", curItem);
         }
         break;
 
@@ -151,8 +150,7 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
 
       SDL_free(evt.drop.file);
 
-      // FIXME:
-      //RefreshList();
+      UpdatePlaylist();
     }
     break;
 
@@ -163,23 +161,62 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
   }
 }
 
+// =============================================================================
+
+void PlaylistState::TryToPlay()
+{
+  int ind = _listBox->GetCurrentItemIndex();
+  if (ind != -1)
+  {
+    _soundPlayerRef.Stop();
+    _soundPlayerRef.Play(_listBox->GetItem(ind)->URI);
+  }
+}
+
 #ifdef DEBUG_BUILD
 // =============================================================================
 
-void PlaylistState::DrawFPS(TG::Printer* const printer)
+void PlaylistState::DrawDimensions()
 {
-  printer->PrintFB(0,
-                   Constants::WindowCharHeightVisible,
-                   std::format(" {} ", _drawTime),
-                   TG::Printer::kAlignLeft,
-                   TG::Colors::Yellow);
+  for (size_t x = 0; x < Constants::WindowCharWidthVisible; x++)
+  {
+    _printerRef.PrintFB(x,
+                        0,
+                        std::format("{}", (x % 10)),
+                        TG::Printer::kAlignLeft,
+                        ((x % 10 == 0) ?
+                         TG::Colors::White :
+                         TG::Colors::ShadesOfGrey::Eight));
+  }
+
+  for (size_t y = 0; y < Constants::WindowCharHeightVisible; y++)
+  {
+    _printerRef.PrintFB(0,
+                        y,
+                        std::format("{}", (y % 10)),
+                        TG::Printer::kAlignLeft,
+                        ((y % 10 == 0) ?
+                         TG::Colors::White :
+                         TG::Colors::ShadesOfGrey::Eight));
+  }
 }
 
 // =============================================================================
 
-void PlaylistState::DrawWindowSize(TG::Printer* const printer)
+void PlaylistState::DrawFPS()
 {
-  printer->PrintFB(
+  _printerRef.PrintFB(0,
+                      Constants::WindowCharHeightVisible,
+                      std::format(" {} ", _drawTime),
+                      TG::Printer::kAlignLeft,
+                      TG::Colors::Yellow);
+}
+
+// =============================================================================
+
+void PlaylistState::DrawWindowSize()
+{
+  _printerRef.PrintFB(
     Constants::WindowCharWidthVisible + 1,
     Constants::WindowCharHeightVisible,
     std::format(
@@ -194,11 +231,11 @@ void PlaylistState::DrawWindowSize(TG::Printer* const printer)
 
 // =============================================================================
 
-void PlaylistState::DrawMouseInfo(TG::Printer* const printer)
+void PlaylistState::DrawMouseInfo()
 {
-  printer->PrintFB(
+  _printerRef.PrintFB(
     Constants::WindowCharWidthVisible + 1,
-    0,
+    1,
     std::format(
       " x: {} y: {} cx: {} cy: {} {} ",
       _mouseClickData.X,
@@ -211,9 +248,9 @@ void PlaylistState::DrawMouseInfo(TG::Printer* const printer)
     TG::Colors::Yellow
   );
 
-  printer->PrintFB(
+  _printerRef.PrintFB(
     Constants::WindowCharWidthVisible + 1,
-    1,
+    2,
     std::format(" {} {} ", _mouseX, _mouseY),
     TG::Printer::kAlignRight,
     TG::Colors::Cyan
@@ -223,50 +260,44 @@ void PlaylistState::DrawMouseInfo(TG::Printer* const printer)
 
 // =============================================================================
 
-void PlaylistState::DrawPlaylist(TG::Printer* const printer,
-                                 const size_t offset)
+void PlaylistState::DrawPlaylist()
 {
-  if (_playlist.empty())
-  {
-    return;
-  }
+  _printerRef.DrawWindow(
+    { _listBox->Transform().x, _listBox->Transform().y },
+    { _listBox->Transform().w, _listBox->Transform().h }
+  );
 
-  size_t itemIndex = 0;
-  size_t itemPosY  = 1;
-  for (;;)
+  size_t yPos = 0;
+  for (size_t ind = _listBox->Offset(); ind < _listBox->GetListSize(); ind++)
   {
-    if (_cursorPosY != -1 and _cursorPosY == itemPosY)
+    if (ind == _listBox->GetCurrentItemIndex())
     {
-      printer->PrintFB(2,
-                      itemPosY,
-                      kHighlighter,
-                      TG::Printer::kAlignLeft,
-                      TG::Colors::ShadesOfGrey::Four,
-                      TG::Colors::Blue);
+      _printerRef.PrintFB(_listBox->Transform().x + 1,
+                          _listBox->Transform().y + 1 + yPos,
+                          _itemBackground,
+                          TG::Printer::kAlignLeft,
+                          TG::Colors::Blue,
+                          TG::Colors::Blue);
 
-      printer->PrintFB(2,
-                       itemPosY,
-                       _playlist[offset + itemIndex].Filename,
-                       TG::Printer::kAlignLeft,
-                       TG::Colors::White,
-                       TG::Colors::Blue);
+      _printerRef.PrintFB(_listBox->Transform().x + 2,
+                          _listBox->Transform().y + 1 + yPos,
+                          std::format("{}", _listBox->GetItem(ind)->Filename),
+                          TG::Printer::kAlignLeft,
+                          TG::Colors::White,
+                          TG::Colors::Blue);
     }
     else
     {
-      printer->PrintFB(2,
-                       itemPosY,
-                       _playlist[offset + itemIndex].Filename,
-                       TG::Printer::kAlignLeft,
-                       TG::Colors::White);
+      _printerRef.PrintFB(_listBox->Transform().x + 2,
+                          _listBox->Transform().y + 1 + yPos,
+                          std::format("{}", _listBox->GetItem(ind)->Filename),
+                          TG::Printer::kAlignLeft,
+                          TG::Colors::White);
     }
 
-    itemPosY++;
-    itemIndex++;
+    yPos++;
 
-    if (
-         (itemPosY >= Constants::WindowCharHeightVisible)
-      or (itemPosY >= _playlist.size())
-    )
+    if (yPos > _listBox->Transform().h - 2)
     {
       break;
     }
@@ -275,75 +306,64 @@ void PlaylistState::DrawPlaylist(TG::Printer* const printer,
 
 // =============================================================================
 
-void PlaylistState::DrawStuff(TG::Printer* const printer)
+void PlaylistState::DrawStuff()
 {
-  printer->Clear();
+  _printerRef.Clear();
 
-  //DrawDimensionHints();
+  DrawPlaylist();
 
-  printer->DrawWindow(
-    { 0, 0 },
-    {
-      (int)Constants::WindowCharWidthVisible,
-      (int)Constants::WindowCharHeightVisible
-    }
-  );
-
-  DrawPlaylist(printer, _playlistOffset);
-
-  if (_appSettingsRef.AlwaysOnTop == SDL_TRUE)
-  {
-    printer->PrintFB(Constants::WindowCharWidthVisible,
-                     1,
-                     "T",
-                     TG::Printer::kAlignLeft,
-                     TG::Colors::Yellow,
-                     TG::Colors::Red);
-  }
-
+  /*
 #ifdef DEBUG_BUILD
-  DrawFPS(printer);
-  DrawWindowSize(printer);
-  DrawMouseInfo(printer);
+  DrawDimensions();
+  DrawFPS();
+  DrawWindowSize();
+  DrawMouseInfo();
 #endif
+  */
 
-  printer->Render();
+  _printerRef.Render();
 }
 
 // =============================================================================
 
-void PlaylistState::RefreshList()
+void PlaylistState::UpdatePlaylist()
 {
   if (fs::is_directory(_droppedFile))
-  {
-    SDL_Log("Dir");
-
-    /*
-    for (auto& entry : fs::recursive_directory_iterator(_droppedFile))
     {
-      std::string uri = entry.path().string();
-      if (fs::is_regular_file(uri))
+      SDL_Log("Dir");
+
+      for (auto& entry : fs::recursive_directory_iterator(_droppedFile))
       {
-        PlaylistItem item;
-        if (Utils::GetModuleInfo(uri, item))
+        std::string uri = entry.path().string();
+        if (fs::is_regular_file(uri))
         {
-          item.Filename = entry.path().filename().string();
-          _playlist.push_back(item);
+          std::string fname = entry.path().filename().string();
+
+          if (fname.length() >= _listBox->Transform().w - 2)
+          {
+            fname.resize(_listBox->Transform().w - 2);
+          }
+
+          PlaylistItem item;
+
+          item.URI      = uri;
+          item.Filename = fname;
+
+          _listBox->Add(item);
         }
       }
     }
-    */
-  }
-  else if (fs::is_regular_file(_droppedFile))
-  {
-    SDL_Log("File");
-
-    /*
-    PlaylistItem item;
-    if (Utils::GetModuleInfo(_droppedFile, item))
+    else if (fs::is_regular_file(_droppedFile))
     {
-      _playlist.push_back(item);
+      SDL_Log("File");
+
+      fs::path p(_droppedFile);
+
+      PlaylistItem item;
+
+      item.URI      = p.string();
+      item.Filename = p.filename().string();
+
+      _listBox->Add(item);
     }
-    */
-  }
 }

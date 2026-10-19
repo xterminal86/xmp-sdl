@@ -3,6 +3,9 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <unordered_map>
+
+using PairUU = std::pair<uint64_t, uint64_t>;
 
 namespace Constants
 {

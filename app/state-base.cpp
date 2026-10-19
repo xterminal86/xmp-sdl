@@ -1,7 +1,15 @@
 #include "state-base.h"
 
-AppStateBase::AppStateBase(const AppSettings& appSettings)
-  : _appSettingsRef(appSettings) {}
+#include "printer.h"
+#include "sound-player.h"
+
+AppStateBase::AppStateBase(const AppSettings& appSettings,
+                           TG::Printer& printerRef,
+                           SoundPlayer& soundPlayerRef)
+  : _appSettingsRef(appSettings),
+    _printerRef(printerRef),
+    _soundPlayerRef(soundPlayerRef)
+{}
 
 // =============================================================================
 
