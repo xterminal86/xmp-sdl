@@ -6,7 +6,9 @@
 
 #include "constants.h"
 #include "state-base.h"
+
 #include "list-box.h"
+#include "button.h"
 
 class PlaylistState : public AppStateBase
 {
@@ -35,6 +37,7 @@ class PlaylistState : public AppStateBase
     std::string _droppedFile;
 
     std::unique_ptr<ListBox<PlaylistItem>> _listBox;
+    std::unique_ptr<Button> _button;
 
     size_t _listItemWidth = 0;
 

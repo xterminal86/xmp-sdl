@@ -26,6 +26,8 @@ void PlaylistState::Init()
   _listItemWidth = (_listBox->Transform().w - 1);
 
   _itemBackground = std::string(_listItemWidth, ' ');
+
+  _button = std::make_unique<Button>(50, 5, " TEST BUTTON ", _printerRef);
 }
 
 // =============================================================================
@@ -62,8 +64,8 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
 
         Utils::GetMouseInfo(evt.button, _mouseClickData);
 
-        int ind = _listBox->MouseToItemIndex(_mouseClickData);
-        SDL_Log("List box index = %d", ind);
+        _listBox->MouseToItemIndex(_mouseClickData);
+        //SDL_Log("List box index = %d", ind);
       }
     }
     break;
@@ -263,8 +265,11 @@ void PlaylistState::DrawMouseInfo()
 void PlaylistState::DrawPlaylist()
 {
   _printerRef.DrawWindow(
-    { _listBox->Transform().x, _listBox->Transform().y },
-    { _listBox->Transform().w, _listBox->Transform().h }
+      { _listBox->Transform().x, _listBox->Transform().y }
+    , { _listBox->Transform().w, _listBox->Transform().h }
+    , "PLAYLIST"
+    , TG::Colors::Yellow
+    , TG::Colors::Blue
   );
 
   size_t yPos = 0;
@@ -312,14 +317,14 @@ void PlaylistState::DrawStuff()
 
   DrawPlaylist();
 
-  /*
+  _button->Draw();
+
 #ifdef DEBUG_BUILD
-  DrawDimensions();
+  //DrawDimensions();
   DrawFPS();
-  DrawWindowSize();
+  //DrawWindowSize();
   DrawMouseInfo();
 #endif
-  */
 
   _printerRef.Render();
 }
