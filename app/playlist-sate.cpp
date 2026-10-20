@@ -27,7 +27,20 @@ void PlaylistState::Init()
 
   _itemBackground = std::string(_listItemWidth, ' ');
 
-  _button = std::make_unique<Button>(50, 5, " TEST BUTTON ", _printerRef);
+  // ---------------------------------------------------------------------------
+  auto _create_button = [this](int x, int y, const std::string& text)
+  {
+    _buttons.push_back(
+      std::make_unique<Button>(x, y, text, _printerRef)
+    );
+  };
+  // ---------------------------------------------------------------------------
+
+  //_create_button(50, 5, " PLAY ");
+  //_buttons.back()->OnClick = []() { SDL_Log("Button play"); };
+  //
+  //_create_button(58, 5, " STOP ");
+  //_buttons.back()->OnClick = []() { SDL_Log("Button stop"); };
 }
 
 // =============================================================================
@@ -40,6 +53,12 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
     {
       _mouseX = evt.motion.x;
       _mouseY = evt.motion.y;
+
+      //Utils::GetMouseInfo(evt.button, _mouseClickData);
+      //for (auto& b : _buttons)
+      //{
+      //  b->MouseOver(_mouseClickData);
+      //}
     }
     break;
 
@@ -66,6 +85,27 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
 
         _listBox->MouseToItemIndex(_mouseClickData);
         //SDL_Log("List box index = %d", ind);
+
+        for (auto& b : _buttons)
+        {
+          b->MouseDown(_mouseClickData);
+        }
+      }
+    }
+    break;
+
+    // ---------------------------------------------------------------------
+
+    case SDL_MOUSEBUTTONUP:
+    {
+      if (evt.button.button == 1)
+      {
+        Utils::GetMouseInfo(evt.button, _mouseClickData);
+
+        for (auto& b : _buttons)
+        {
+          b->MouseUp(_mouseClickData);
+        }
       }
     }
     break;
@@ -153,6 +193,8 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
       SDL_free(evt.drop.file);
 
       UpdatePlaylist();
+
+      SDL_RaiseWindow(_windowRef);
     }
     break;
 
@@ -272,6 +314,16 @@ void PlaylistState::DrawPlaylist()
     , TG::Colors::Blue
   );
 
+  if (_listBox->GetListSize() == 0)
+  {
+    _printerRef.PrintFB(_listBox->Transform().x + _listBox->Transform().w / 2,
+                        _listBox->Transform().y + _listBox->Transform().h / 2,
+                        "drag and drop here",
+                        TG::Printer::kAlignCenter,
+                        TG::Colors::White);
+    return;
+  }
+
   size_t yPos = 0;
   for (size_t ind = _listBox->Offset(); ind < _listBox->GetListSize(); ind++)
   {
@@ -317,7 +369,10 @@ void PlaylistState::DrawStuff()
 
   DrawPlaylist();
 
-  _button->Draw();
+  for (auto& b : _buttons)
+  {
+    b->Draw();
+  }
 
 #ifdef DEBUG_BUILD
   //DrawDimensions();

@@ -24,6 +24,7 @@ class AppStateBase
     virtual void HandleEvent(const SDL_Event& evt) = 0;
     virtual void DrawStuff() = 0;
 
+    void SetWindowRef(SDL_Window* wnd);
     void SetDrawTime(const uint64_t dt);
 
   protected:
@@ -38,6 +39,8 @@ class AppStateBase
     MouseInfo _mouseClickData;
 
     uint64_t _drawTime = 0;
+
+    SDL_Window* _windowRef = nullptr;
 };
 
 #endif // STATEBASE_H

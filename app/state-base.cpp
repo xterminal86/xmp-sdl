@@ -21,3 +21,10 @@ void AppStateBase::SetDrawTime(const uint64_t dt)
 {
   _drawTime = dt;
 }
+
+// =============================================================================
+
+void AppStateBase::SetWindowRef(SDL_Window* wnd)
+{
+  _windowRef = wnd;
+}

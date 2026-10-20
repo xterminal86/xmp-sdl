@@ -851,6 +851,38 @@ namespace TG
 
       // =======================================================================
 
+      void DrawFilledRect(int x, int y, int w, int h, uint32_t color)
+      {
+        TileInfo& tile = _tiles[ (int)NameCP437::BLOCK ];
+
+        SDL_Rect src;
+        src.x = tile.X;
+        src.y = tile.Y;
+        src.w = 1;
+        src.h = 1;
+
+        SDL_Rect dst;
+        dst.x = x;
+        dst.y = y;
+        dst.w = w;
+        dst.h = h;
+
+        ConvertHtmlToRGB(color);
+        SDL_SetTextureColorMod(_tileset,
+                               _convertedHtml.R,
+                               _convertedHtml.G,
+                               _convertedHtml.B);
+
+        if (SDL_GetRenderTarget(_rendererRef) == nullptr)
+        {
+          SDL_SetRenderTarget(_rendererRef, _frameBuffer);
+        }
+
+        SDL_RenderCopy(_rendererRef, _tileset, &src, &dst);
+      }
+
+      // =======================================================================
+
       void DrawWindow(const Position& leftCorner,
                       const Position& size,
                       const std::string& header = std::string{},

@@ -1,5 +1,7 @@
 #include "button.h"
 
+#include "constants.h"
+
 Button::Button(size_t charPosX,
                size_t charPosY,
                const std::string& text,
@@ -12,6 +14,68 @@ Button::Button(size_t charPosX,
   _transform.h = 2;
 
   _text = text;
+
+  _pixelPerfect.x = charPosX * Constants::CharWidth + Constants::CharWidth / 2 + 2;
+  _pixelPerfect.y = charPosY * Constants::CharHeight + Constants::CharHeight / 2;
+  _pixelPerfect.w = _pixelPerfect.x + _transform.w * Constants::CharWidth - Constants::CharWidth - 4;
+  _pixelPerfect.h = _pixelPerfect.y + _transform.h * Constants::CharHeight - 2;
+}
+
+// =============================================================================
+
+void Button::MouseDown(const MouseInfo& mi)
+{
+  bool inside = (
+      mi.X >= _pixelPerfect.x
+  and mi.X <= _pixelPerfect.w
+  and mi.Y >= _pixelPerfect.y
+  and mi.Y <= _pixelPerfect.h
+  );
+
+  if (inside)
+  {
+    _mdownFlag = true;
+    _fgColor = TG::Colors::Black;
+    _bgColor = TG::Colors::White;
+  }
+}
+
+// =============================================================================
+
+void Button::MouseUp(const MouseInfo& mi)
+{
+  bool inside = (
+      mi.X >= _pixelPerfect.x
+  and mi.X <= _pixelPerfect.w
+  and mi.Y >= _pixelPerfect.y
+  and mi.Y <= _pixelPerfect.h
+  );
+
+  if (inside or _mdownFlag)
+  {
+    _mdownFlag = false;
+    _fgColor = TG::Colors::White;
+    _bgColor = TG::Colors::Black;
+
+    if (OnClick.target_type() != typeid(void))
+    {
+      OnClick();
+    }
+  }
+}
+
+// =============================================================================
+
+void Button::MouseOver(const MouseInfo& mi)
+{
+  bool inside = (
+      mi.X > _pixelPerfect.x
+  and mi.X < _pixelPerfect.w
+  and mi.Y > _pixelPerfect.y
+  and mi.Y < _pixelPerfect.h
+  );
+
+  _hoverFlag = inside;
 }
 
 // =============================================================================
@@ -64,9 +128,30 @@ void Button::Draw()
                         TG::Colors::White);
   }
 
+  /*
+  if (_hoverFlag)
+  {
+    _printerRef.DrawFilledRect(_pixelPerfect.x,
+                               _pixelPerfect.y,
+                               _pixelPerfect.w - _pixelPerfect.x,
+                               _pixelPerfect.h - _pixelPerfect.y,
+                               TG::Colors::ShadesOfGrey::Eight);
+  }
+  */
+
+  if (_mdownFlag)
+  {
+    _printerRef.DrawFilledRect(_pixelPerfect.x,
+                               _pixelPerfect.y,
+                               _pixelPerfect.w - _pixelPerfect.x,
+                               _pixelPerfect.h - _pixelPerfect.y,
+                               TG::Colors::White);
+  }
+
   _printerRef.PrintFB(_transform.x + 1,
                       _transform.y + 1,
                       _text,
                       TG::Printer::kAlignLeft,
-                      TG::Colors::White);
+                      _fgColor,
+                      _bgColor);
 }

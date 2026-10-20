@@ -37,7 +37,8 @@ class PlaylistState : public AppStateBase
     std::string _droppedFile;
 
     std::unique_ptr<ListBox<PlaylistItem>> _listBox;
-    std::unique_ptr<Button> _button;
+
+    std::vector<std::unique_ptr<Button>> _buttons;
 
     size_t _listItemWidth = 0;
 

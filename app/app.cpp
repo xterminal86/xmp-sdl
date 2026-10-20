@@ -62,6 +62,11 @@ bool Application::InitDrawing()
     return false;
   }
 
+  for (auto& kvp : _appStates)
+  {
+    kvp.second->SetWindowRef(_window);
+  }
+
   int drivers = SDL_GetNumRenderDrivers();
 
   for (int i = 0; i < drivers; i++)

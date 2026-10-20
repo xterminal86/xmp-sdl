@@ -4,8 +4,10 @@
 #include <cstdint>
 #include <cstddef>
 #include <unordered_map>
+#include <functional>
 
 using PairUU = std::pair<uint64_t, uint64_t>;
+using Callback = std::function<void()>;
 
 namespace Constants
 {
