@@ -575,7 +575,7 @@ namespace TG
                                  _convertedHtml.R,
                                  _convertedHtml.G,
                                  _convertedHtml.B);
-          DrawTile(posX, posY, 219);
+          DrawTile(posX, posY, (int)NameCP437::BLOCK);
         }
 
         ConvertHtmlToRGB(htmlColorFg);
@@ -624,7 +624,7 @@ namespace TG
                                    _convertedHtml.R,
                                    _convertedHtml.G,
                                    _convertedHtml.B);
-            DrawTile(px, py, 219);
+            DrawTile(px, py, (int)NameCP437::BLOCK);
           }
 
           ConvertHtmlToRGB(htmlColorFg);
@@ -883,6 +883,33 @@ namespace TG
 
       // =======================================================================
 
+      // Print Pixel Perfect
+      void PrintPP(int x,
+                   int y,
+                   NameCP437 tileName,
+                   uint32_t fgColor,
+                   uint32_t bgColor = Colors::None)
+      {
+        if (bgColor != Colors::None)
+        {
+          ConvertHtmlToRGB(bgColor);
+          SDL_SetTextureColorMod(_tileset,
+                                 _convertedHtml.R,
+                                 _convertedHtml.G,
+                                 _convertedHtml.B);
+          DrawTile(x, y, (int)NameCP437::BLOCK);
+        }
+
+        ConvertHtmlToRGB(fgColor);
+        SDL_SetTextureColorMod(_tileset,
+                               _convertedHtml.R,
+                               _convertedHtml.G,
+                               _convertedHtml.B);
+        DrawTile(x, y, (int)tileName);
+      }
+
+      // =======================================================================
+
       void DrawWindow(const Position& leftCorner,
                       const Position& size,
                       const std::string& header = std::string{},
@@ -1009,7 +1036,7 @@ namespace TG
                                    _convertedHtml.R,
                                    _convertedHtml.G,
                                    _convertedHtml.B);
-            DrawTile(headerPosX, headerPosY, 219);
+            DrawTile(headerPosX, headerPosY, (int)NameCP437::BLOCK);
 
             ConvertHtmlToRGB(headerFgColor);
             SDL_SetTextureColorMod(_tileset,

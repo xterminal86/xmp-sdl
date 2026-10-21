@@ -223,6 +223,14 @@ bool SoundPlayer::Play(const std::string& uri)
     return res;
   }
 
+  //
+  // "Default pan separation: percentual left/right pan separation in formats
+  // with only left and right channels. Default is 100%, but 50% is
+  // recommended for most audio playback situations. This option must be
+  // specified before calling xmp_load_module()."
+  //
+  SetParam(STR(XMP_PLAYER_DEFPAN), XMP_PLAYER_DEFPAN, 50);
+
   if (not LoadModule(uri))
   {
     return res;
@@ -235,15 +243,15 @@ bool SoundPlayer::Play(const std::string& uri)
   {
     case 0:
     {
+      // NOTE: must be set in "playing state" (i.e. after xmp_start_player())
+      SetParam(STR(XMP_PLAYER_INTERP), XMP_PLAYER_INTERP, XMP_INTERP_SPLINE);
+      //SetParam(STR(XMP_PLAYER_INTERP), XMP_PLAYER_INTERP, XMP_INTERP_NEAREST);
+
       int v = xmp_get_player(_xmpContext, XMP_PLAYER_DEFPAN);
       SDL_Log("defpan %d", v);
 
       v = xmp_get_player(_xmpContext, XMP_PLAYER_INTERP);
       SDL_Log("interp %d", v);
-
-      // NOTE: no effect?
-      SetParam(STR(XMP_PLAYER_DEFPAN), XMP_PLAYER_DEFPAN, 50);
-      SetParam(STR(XMP_PLAYER_INTERP), XMP_PLAYER_INTERP, XMP_INTERP_SPLINE);
 
       SDL_PauseAudioDevice(_audioDevice, 0);
       res = true;
@@ -267,6 +275,7 @@ bool SoundPlayer::Play(const std::string& uri)
     break;
 
     default:
+      SDL_Log("%s:%d - unhandled error code %d", __FILE__, __LINE__, ec);
       break;
   }
 

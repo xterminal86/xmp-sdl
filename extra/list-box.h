@@ -24,6 +24,15 @@ class ListBox
 
     // =========================================================================
 
+    void Clear()
+    {
+      _items.clear();
+      _itemIndex = -1;
+      _offset = 0;
+    }
+
+    // =========================================================================
+
     int MouseToItemIndex(const MouseInfo& mouseInfo)
     {
       bool mouseInside = (

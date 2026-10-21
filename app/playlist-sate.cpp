@@ -19,11 +19,11 @@ const std::string kHighlighter(Constants::WindowCharWidthVisible - 2, ' ');
 
 void PlaylistState::Init()
 {
-  _listBox = std::make_unique<ListBox<PlaylistItem>>(
+  _playlist = std::make_unique<ListBox<PlaylistItem>>(
     0, 0, 40, Constants::WindowCharHeightVisible
   );
 
-  _listItemWidth = (_listBox->Transform().w - 1);
+  _listItemWidth = (_playlist->Transform().w - 1);
 
   _itemBackground = std::string(_listItemWidth, ' ');
 
@@ -36,8 +36,13 @@ void PlaylistState::Init()
   };
   // ---------------------------------------------------------------------------
 
-  //_create_button(50, 5, " PLAY ");
-  //_buttons.back()->OnClick = []() { SDL_Log("Button play"); };
+  _create_button(41, 5, " CLEAR ");
+  _buttons.back()->OnClick = [this]()
+  {
+    _playlist->Clear();
+    _soundPlayerRef.Stop();
+  };
+
   //
   //_create_button(58, 5, " STOP ");
   //_buttons.back()->OnClick = []() { SDL_Log("Button stop"); };
@@ -54,11 +59,11 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
       _mouseX = evt.motion.x;
       _mouseY = evt.motion.y;
 
-      //Utils::GetMouseInfo(evt.button, _mouseClickData);
-      //for (auto& b : _buttons)
-      //{
-      //  b->MouseOver(_mouseClickData);
-      //}
+      Utils::GetMouseInfo(evt.button, _mouseClickData);
+      for (auto& b : _buttons)
+      {
+        b->MouseOver(_mouseClickData);
+      }
     }
     break;
 
@@ -83,7 +88,7 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
 
         Utils::GetMouseInfo(evt.button, _mouseClickData);
 
-        _listBox->MouseToItemIndex(_mouseClickData);
+        _playlist->MouseToItemIndex(_mouseClickData);
         //SDL_Log("List box index = %d", ind);
 
         for (auto& b : _buttons)
@@ -120,13 +125,13 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
         // FIXME: debug
         case SDLK_a:
         {
-          size_t s = _listBox->GetListSize();
+          size_t s = _playlist->GetListSize();
 
           PlaylistItem item;
 
           item.Filename = std::format("Item {}", s++);
 
-          _listBox->Add(item);
+          _playlist->Add(item);
         }
         break;
 
@@ -148,12 +153,12 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
 
         case SDLK_DOWN:
         {
-          _listBox->SelectNextItem();
+          _playlist->SelectNextItem();
 
-          int curItem = _listBox->GetCurrentItemIndex();
-          if (curItem != -1 and curItem >= _listBox->GetBottomItemIndex())
+          int curItem = _playlist->GetCurrentItemIndex();
+          if (curItem != -1 and curItem >= _playlist->GetBottomItemIndex())
           {
-            _listBox->ScrollDown();
+            _playlist->ScrollDown();
           }
 
           SDL_Log("List box index = %d", curItem);
@@ -164,12 +169,12 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
 
         case SDLK_UP:
         {
-          _listBox->SelectPreviousItem();
+          _playlist->SelectPreviousItem();
 
-          int curItem = _listBox->GetCurrentItemIndex();
-          if (curItem != -1 and curItem <= _listBox->GetTopItemIndex())
+          int curItem = _playlist->GetCurrentItemIndex();
+          if (curItem != -1 and curItem <= _playlist->GetTopItemIndex())
           {
-            _listBox->ScrollUp();
+            _playlist->ScrollUp();
           }
 
           SDL_Log("List box index = %d", curItem);
@@ -209,11 +214,11 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
 
 void PlaylistState::TryToPlay()
 {
-  int ind = _listBox->GetCurrentItemIndex();
+  int ind = _playlist->GetCurrentItemIndex();
   if (ind != -1)
   {
     _soundPlayerRef.Stop();
-    _soundPlayerRef.Play(_listBox->GetItem(ind)->URI);
+    _soundPlayerRef.Play(_playlist->GetItem(ind)->URI);
   }
 }
 
@@ -307,17 +312,17 @@ void PlaylistState::DrawMouseInfo()
 void PlaylistState::DrawPlaylist()
 {
   _printerRef.DrawWindow(
-      { _listBox->Transform().x, _listBox->Transform().y }
-    , { _listBox->Transform().w, _listBox->Transform().h }
+      { _playlist->Transform().x, _playlist->Transform().y }
+    , { _playlist->Transform().w, _playlist->Transform().h }
     , "PLAYLIST"
     , TG::Colors::Yellow
     , TG::Colors::Blue
   );
 
-  if (_listBox->GetListSize() == 0)
+  if (_playlist->GetListSize() == 0)
   {
-    _printerRef.PrintFB(_listBox->Transform().x + _listBox->Transform().w / 2,
-                        _listBox->Transform().y + _listBox->Transform().h / 2,
+    _printerRef.PrintFB(_playlist->Transform().x + _playlist->Transform().w / 2,
+                        _playlist->Transform().y + _playlist->Transform().h / 2,
                         "drag and drop here",
                         TG::Printer::kAlignCenter,
                         TG::Colors::White);
@@ -325,36 +330,36 @@ void PlaylistState::DrawPlaylist()
   }
 
   size_t yPos = 0;
-  for (size_t ind = _listBox->Offset(); ind < _listBox->GetListSize(); ind++)
+  for (size_t ind = _playlist->Offset(); ind < _playlist->GetListSize(); ind++)
   {
-    if (ind == _listBox->GetCurrentItemIndex())
+    if (ind == _playlist->GetCurrentItemIndex())
     {
-      _printerRef.PrintFB(_listBox->Transform().x + 1,
-                          _listBox->Transform().y + 1 + yPos,
+      _printerRef.PrintFB(_playlist->Transform().x + 1,
+                          _playlist->Transform().y + 1 + yPos,
                           _itemBackground,
                           TG::Printer::kAlignLeft,
                           TG::Colors::Blue,
                           TG::Colors::Blue);
 
-      _printerRef.PrintFB(_listBox->Transform().x + 2,
-                          _listBox->Transform().y + 1 + yPos,
-                          std::format("{}", _listBox->GetItem(ind)->Filename),
+      _printerRef.PrintFB(_playlist->Transform().x + 2,
+                          _playlist->Transform().y + 1 + yPos,
+                          std::format("{}", _playlist->GetItem(ind)->Filename),
                           TG::Printer::kAlignLeft,
                           TG::Colors::White,
                           TG::Colors::Blue);
     }
     else
     {
-      _printerRef.PrintFB(_listBox->Transform().x + 2,
-                          _listBox->Transform().y + 1 + yPos,
-                          std::format("{}", _listBox->GetItem(ind)->Filename),
+      _printerRef.PrintFB(_playlist->Transform().x + 2,
+                          _playlist->Transform().y + 1 + yPos,
+                          std::format("{}", _playlist->GetItem(ind)->Filename),
                           TG::Printer::kAlignLeft,
                           TG::Colors::White);
     }
 
     yPos++;
 
-    if (yPos > _listBox->Transform().h - 2)
+    if (yPos > _playlist->Transform().h - 2)
     {
       break;
     }
@@ -399,9 +404,9 @@ void PlaylistState::UpdatePlaylist()
         {
           std::string fname = entry.path().filename().string();
 
-          if (fname.length() >= _listBox->Transform().w - 2)
+          if (fname.length() >= _playlist->Transform().w - 2)
           {
-            fname.resize(_listBox->Transform().w - 2);
+            fname.resize(_playlist->Transform().w - 2);
           }
 
           PlaylistItem item;
@@ -409,7 +414,7 @@ void PlaylistState::UpdatePlaylist()
           item.URI      = uri;
           item.Filename = fname;
 
-          _listBox->Add(item);
+          _playlist->Add(item);
         }
       }
     }
@@ -424,6 +429,6 @@ void PlaylistState::UpdatePlaylist()
       item.URI      = p.string();
       item.Filename = p.filename().string();
 
-      _listBox->Add(item);
+      _playlist->Add(item);
     }
 }

@@ -32,11 +32,9 @@ class PlaylistState : public AppStateBase
     void DrawMouseInfo();
 #endif
 
-    std::vector<PlaylistItem> _playlist;
-
     std::string _droppedFile;
 
-    std::unique_ptr<ListBox<PlaylistItem>> _listBox;
+    std::unique_ptr<ListBox<PlaylistItem>> _playlist;
 
     std::vector<std::unique_ptr<Button>> _buttons;
 

@@ -22,6 +22,8 @@ class Button
     Callback OnClick;
 
   private:
+    bool IsMouseInside(const MouseInfo& mi);
+
     TG::Printer& _printerRef;
 
     SDL_Rect _transform;
@@ -34,6 +36,9 @@ class Button
 
     bool _hoverFlag = false;
     bool _mdownFlag = false;
+
+    const size_t kButtonBorderSize = 2;
+    const size_t kBorderSizeDoubled = kButtonBorderSize * 2;
 };
 
 #endif // BUTTON_H
