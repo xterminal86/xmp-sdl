@@ -20,6 +20,18 @@ class ListBox
       _transform.y = charPosY;
       _transform.w = charWidth;
       _transform.h = charHeight;
+
+      _pixelPerfect.x = charPosX * Constants::CharWidth + Constants::CharWidth;
+      _pixelPerfect.y = charPosY * Constants::CharHeight + Constants::CharHeight;
+      _pixelPerfect.w = _transform.w * Constants::CharWidth - Constants::CharWidth;
+      _pixelPerfect.h = _transform.h * Constants::CharHeight - Constants::CharHeight;
+    }
+
+    // =========================================================================
+
+    void MouseOver(const MouseInfo& mi)
+    {
+      _hoverFlag = IsMouseInside(mi);
     }
 
     // =========================================================================
@@ -197,7 +209,20 @@ class ListBox
     }
 
   private:
+    bool IsMouseInside(const MouseInfo& mi)
+    {
+      return (
+            mi.X >= _pixelPerfect.x
+        and mi.X <= _pixelPerfect.x + _pixelPerfect.w
+        and mi.Y >= _pixelPerfect.y
+        and mi.Y <= _pixelPerfect.y + _pixelPerfect.h
+      );
+    }
+
+    bool _hoverFlag = false;
+
     SDL_Rect _transform;
+    SDL_Rect _pixelPerfect;
 
     std::vector<T> _items;
 

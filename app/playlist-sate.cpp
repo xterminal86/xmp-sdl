@@ -64,6 +64,8 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
       {
         b->MouseOver(_mouseClickData);
       }
+
+      _playlist->MouseOver(_mouseClickData);
     }
     break;
 

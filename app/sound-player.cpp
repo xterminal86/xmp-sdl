@@ -90,7 +90,7 @@ bool SoundPlayer::Init()
   SDL_AudioSpec a;
 
   a.freq     = 44100;
-  a.format   = (AUDIO_S8);
+  a.format   = (AUDIO_S16SYS);
   a.channels = 2;
   a.samples  = 2048;
   a.callback = AudioCallback;
@@ -238,7 +238,11 @@ bool SoundPlayer::Play(const std::string& uri)
 
   xmp_get_module_info(_xmpContext, &_moduleInfo);
 
-  int ec = xmp_start_player(_xmpContext, 44100, XMP_FORMAT_8BIT);
+  //
+  // 0 means 16 bit signed. This must match SDL_AudioSpec's format of the opened
+  // audio device.
+  //
+  int ec = xmp_start_player(_xmpContext, 44100, 0);
   switch (ec)
   {
     case 0:
@@ -246,12 +250,6 @@ bool SoundPlayer::Play(const std::string& uri)
       // NOTE: must be set in "playing state" (i.e. after xmp_start_player())
       SetParam(STR(XMP_PLAYER_INTERP), XMP_PLAYER_INTERP, XMP_INTERP_SPLINE);
       //SetParam(STR(XMP_PLAYER_INTERP), XMP_PLAYER_INTERP, XMP_INTERP_NEAREST);
-
-      int v = xmp_get_player(_xmpContext, XMP_PLAYER_DEFPAN);
-      SDL_Log("defpan %d", v);
-
-      v = xmp_get_player(_xmpContext, XMP_PLAYER_INTERP);
-      SDL_Log("interp %d", v);
 
       SDL_PauseAudioDevice(_audioDevice, 0);
       res = true;
