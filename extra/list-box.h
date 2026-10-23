@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <format>
+#include <concepts>
 
 #include <SDL2/SDL.h>
 
@@ -11,6 +12,18 @@
 #include "printer.h"
 
 template <typename T>
+concept HasToString = requires(T a)
+{
+  { a.ToString() } -> std::convertible_to<std::string>;
+};
+
+template <typename T>
+concept IsString = std::is_same_v<std::remove_cvref_t<T>, std::string>;
+
+template <typename T>
+concept StringRepresentable = HasToString<T> or IsString<T>;
+
+template <StringRepresentable T>
 class ListBox
 {
   public:

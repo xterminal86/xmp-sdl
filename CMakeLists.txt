@@ -49,3 +49,4 @@ target_include_directories(
 
 target_link_libraries(${TARGET_NAME} SDL2::SDL2 libxmp::xmp_shared)
 
+add_subdirectory(tests)

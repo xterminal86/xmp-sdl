@@ -16,6 +16,11 @@ struct PlaylistItem
   std::string SongType;
 
   xmp_module_info ModuleInfo;
+
+  std::string ToString()
+  {
+    return Filename;
+  }
 };
 
 struct MouseInfo
