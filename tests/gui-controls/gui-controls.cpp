@@ -25,19 +25,26 @@ int64_t Counter = 0;
 
 void InitControls()
 {
+  List = std::make_unique<ListBox<std::string>>(10, 0, 30, 10, Printer);
+
   Buttons.push_back(
     std::make_unique<Button>(0, 0, " + ", Printer)
   );
 
-  Buttons.back()->OnClick = []() { Counter++; };
+  Buttons.back()->OnClick = []()
+  {
+    Counter++;
+    List->Add(std::format("Item {}", Counter));
+  };
 
   Buttons.push_back(
     std::make_unique<Button>(0, 4, " - ", Printer)
   );
 
-  Buttons.back()->OnClick = []() { Counter--; };
-
-  List = std::make_unique<ListBox<std::string>>(10, 0, 30, 30);
+  Buttons.back()->OnClick = []()
+  {
+    Counter--;
+  };
 }
 
 // =============================================================================
@@ -56,6 +63,8 @@ void Draw()
                   std::format("{}", Counter),
                   TG::Printer::kAlignLeft,
                   TG::Colors::White);
+
+  List->Draw();
 
   // FPS
   Printer.PrintFB(Constants::WindowCharWidthVisible,
@@ -163,6 +172,38 @@ int main(int argc, char* argv[])
               goto l_exit;
             }
             break;
+
+            // -----------------------------------------------------------------
+
+            case SDLK_DOWN:
+            {
+              List->SelectNextItem();
+
+              int curItem = List->GetCurrentItemIndex();
+              if (curItem != -1 and curItem >= List->GetBottomItemIndex())
+              {
+                List->ScrollDown();
+              }
+
+              SDL_Log("List box index = %d", curItem);
+            }
+            break;
+
+            // -----------------------------------------------------------------
+
+            case SDLK_UP:
+            {
+              List->SelectPreviousItem();
+
+              int curItem = List->GetCurrentItemIndex();
+              if (curItem != -1 and curItem <= List->GetTopItemIndex())
+              {
+                List->ScrollUp();
+              }
+
+              SDL_Log("List box index = %d", curItem);
+            }
+            break;
           }
         }
         break;
@@ -179,6 +220,8 @@ int main(int argc, char* argv[])
             {
               b->MouseDown(mi);
             }
+
+            List->MouseToItemIndex(mi);
           }
         }
         break;
@@ -199,18 +242,20 @@ int main(int argc, char* argv[])
         }
         break;
 
-          // ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------
 
-          case SDL_MOUSEMOTION:
+        case SDL_MOUSEMOTION:
+        {
+          Utils::GetMouseInfo(evt.button, mi);
+
+          for (auto& b : Buttons)
           {
-            Utils::GetMouseInfo(evt.button, mi);
-
-            for (auto& b : Buttons)
-            {
-              b->MouseOver(mi);
-            }
+            b->MouseOver(mi);
           }
-          break;
+
+          List->MouseOver(mi);
+        }
+        break;
 
         // ---------------------------------------------------------------------
 

@@ -37,10 +37,6 @@ class PlaylistState : public AppStateBase
     std::unique_ptr<ListBox<PlaylistItem>> _playlist;
 
     std::vector<std::unique_ptr<Button>> _buttons;
-
-    size_t _listItemWidth = 0;
-
-    std::string _itemBackground;
 };
 
 #endif // PLAYLISTSTATE_H

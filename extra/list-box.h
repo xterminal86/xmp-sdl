@@ -27,7 +27,12 @@ template <StringRepresentable T>
 class ListBox
 {
   public:
-    ListBox(int charPosX, int charPosY, int charWidth, int charHeight)
+    ListBox(int charPosX,
+            int charPosY,
+            int charWidth,
+            int charHeight,
+            TG::Printer& printerRef)
+      : _printerRef(printerRef)
     {
       _transform.x = charPosX;
       _transform.y = charPosY;
@@ -38,6 +43,10 @@ class ListBox
       _pixelPerfect.y = charPosY * Constants::CharHeight + Constants::CharHeight;
       _pixelPerfect.w = _transform.w * Constants::CharWidth - Constants::CharWidth;
       _pixelPerfect.h = _transform.h * Constants::CharHeight - Constants::CharHeight;
+
+      _listItemWidth = _transform.w - 1;
+
+      _itemBackground = std::string(_listItemWidth, ' ');
     }
 
     // =========================================================================
@@ -221,6 +230,109 @@ class ListBox
       return (index < 0 or index >= _items.size()) ? nullptr : &_items[index];
     }
 
+    // =========================================================================
+
+    void Draw()
+    {
+      _printerRef.DrawFilledRect(_pixelPerfect.x - 2,
+                                 _pixelPerfect.y - 2,
+                                 _pixelPerfect.w + 4,
+                                 _pixelPerfect.h + 4,
+                                 TG::Colors::White);
+
+      _printerRef.DrawFilledRect(_pixelPerfect.x,
+                                 _pixelPerfect.y,
+                                 _pixelPerfect.w,
+                                 _pixelPerfect.h,
+                                 TG::Colors::Black);
+
+      size_t yPos = 0;
+      for (size_t ind = _offset; ind < _items.size(); ind++)
+      {
+        if (ind == _itemIndex)
+        {
+          _printerRef.PrintFB(_transform.x + 1,
+                              _transform.y + 1 + yPos,
+                              _itemBackground,
+                              TG::Printer::kAlignLeft,
+                              TG::Colors::Blue,
+                              TG::Colors::Blue);
+
+          T* item = GetItem(ind);
+
+          if (item != nullptr)
+          {
+            if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
+            {
+              _printerRef.PrintFB(_transform.x + 2,
+                                  _transform.y + 1 + yPos,
+                                  *item,
+                                  TG::Printer::kAlignLeft,
+                                  TG::Colors::White,
+                                  TG::Colors::Blue);
+            }
+            else
+            {
+              _printerRef.PrintFB(_transform.x + 2,
+                                  _transform.y + 1 + yPos,
+                                  item->ToString(),
+                                  TG::Printer::kAlignLeft,
+                                  TG::Colors::White,
+                                  TG::Colors::Blue);
+            }
+          }
+          else
+          {
+            _printerRef.PrintFB(_transform.x + 2,
+                                _transform.y + 1 + yPos,
+                                std::format("{:p} - (null)", (void*)item),
+                                TG::Printer::kAlignLeft,
+                                TG::Colors::White,
+                                TG::Colors::Blue);
+          }
+        }
+        else
+        {
+          T* item = GetItem(ind);
+
+          if (item != nullptr)
+          {
+            if constexpr (std::is_same_v<std::remove_cvref_t<T>, std::string>)
+            {
+              _printerRef.PrintFB(_transform.x + 2,
+                                  _transform.y + 1 + yPos,
+                                  *item,
+                                  TG::Printer::kAlignLeft,
+                                  TG::Colors::White);
+            }
+            else
+            {
+              _printerRef.PrintFB(_transform.x + 2,
+                                  _transform.y + 1 + yPos,
+                                  item->ToString(),
+                                  TG::Printer::kAlignLeft,
+                                  TG::Colors::White);
+            }
+          }
+          else
+          {
+            _printerRef.PrintFB(_transform.x + 2,
+                                _transform.y + 1 + yPos,
+                                std::format("{:p} - (null)", (void*)item),
+                                TG::Printer::kAlignLeft,
+                                TG::Colors::White);
+          }
+        }
+
+        yPos++;
+
+        if (yPos > _transform.h - 2)
+        {
+          break;
+        }
+      }
+    }
+
   private:
     bool IsMouseInside(const MouseInfo& mi)
     {
@@ -242,6 +354,12 @@ class ListBox
     int _itemIndex = -1;
 
     size_t _offset = 0;
+
+    TG::Printer& _printerRef;
+
+    size_t _listItemWidth = 0;
+
+    std::string _itemBackground;
 };
 
 #endif // LISTBOX_H

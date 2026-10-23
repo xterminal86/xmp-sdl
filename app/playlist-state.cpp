@@ -20,12 +20,12 @@ const std::string kHighlighter(Constants::WindowCharWidthVisible - 2, ' ');
 void PlaylistState::Init()
 {
   _playlist = std::make_unique<ListBox<PlaylistItem>>(
-    0, 0, 40, Constants::WindowCharHeightVisible
+    0, 0, 40, Constants::WindowCharHeightVisible, _printerRef
   );
 
-  _listItemWidth = (_playlist->Transform().w - 1);
+  //_listItemWidth = (_playlist->Transform().w - 1);
 
-  _itemBackground = std::string(_listItemWidth, ' ');
+  //_itemBackground = std::string(_listItemWidth, ' ');
 
   // ---------------------------------------------------------------------------
   auto _create_button = [this](int x, int y, const std::string& text)
@@ -331,41 +331,7 @@ void PlaylistState::DrawPlaylist()
     return;
   }
 
-  size_t yPos = 0;
-  for (size_t ind = _playlist->Offset(); ind < _playlist->GetListSize(); ind++)
-  {
-    if (ind == _playlist->GetCurrentItemIndex())
-    {
-      _printerRef.PrintFB(_playlist->Transform().x + 1,
-                          _playlist->Transform().y + 1 + yPos,
-                          _itemBackground,
-                          TG::Printer::kAlignLeft,
-                          TG::Colors::Blue,
-                          TG::Colors::Blue);
-
-      _printerRef.PrintFB(_playlist->Transform().x + 2,
-                          _playlist->Transform().y + 1 + yPos,
-                          std::format("{}", _playlist->GetItem(ind)->Filename),
-                          TG::Printer::kAlignLeft,
-                          TG::Colors::White,
-                          TG::Colors::Blue);
-    }
-    else
-    {
-      _printerRef.PrintFB(_playlist->Transform().x + 2,
-                          _playlist->Transform().y + 1 + yPos,
-                          std::format("{}", _playlist->GetItem(ind)->Filename),
-                          TG::Printer::kAlignLeft,
-                          TG::Colors::White);
-    }
-
-    yPos++;
-
-    if (yPos > _playlist->Transform().h - 2)
-    {
-      break;
-    }
-  }
+  _playlist->Draw();
 }
 
 // =============================================================================
