@@ -212,7 +212,9 @@ namespace TG
     VBAR_3L = 222,
     VBAR_3R = 221,
     BLOCK = 219,
+    TRIPLE_H = 240,
     WAVES = 247,
+    SQUARE = 254
   };
 
   // ===========================================================================
@@ -636,6 +638,17 @@ namespace TG
 
           px += _tileWidthScaled;
         }
+      }
+
+      // =======================================================================
+
+      void PrintFB(const int& x,
+                   const int& y,
+                   NameCP437 glyph,
+                   const uint32_t& htmlColorFg,
+                   const uint32_t& htmlColorBg = Colors::Black)
+      {
+        PrintFB(x, y, (int)glyph, htmlColorFg, htmlColorBg);
       }
 
       // =======================================================================

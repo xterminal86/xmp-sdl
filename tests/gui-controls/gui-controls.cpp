@@ -25,7 +25,7 @@ int64_t Counter = 0;
 
 void InitControls()
 {
-  List = std::make_unique<ListBox<std::string>>(10, 0, 30, 10, Printer);
+  List = std::make_unique<ListBox<std::string>>(10, 5, 30, 10, Printer, 4);
 
   Buttons.push_back(
     std::make_unique<Button>(0, 0, " + ", Printer)

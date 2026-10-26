@@ -7,6 +7,8 @@
 #include <functional>
 
 using PairUU = std::pair<uint64_t, uint64_t>;
+using PairII = std::pair<int, int>;
+
 using Callback = std::function<void()>;
 
 namespace Constants
@@ -15,6 +17,9 @@ namespace Constants
 
   extern const size_t CharWidth;
   extern const size_t CharHeight;
+
+  extern const size_t CharWidthHalf;
+  extern const size_t CharHeightHalf;
 
   extern const size_t WindowCharWidth;
   extern const size_t WindowCharHeight;

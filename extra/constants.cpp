@@ -10,6 +10,9 @@ namespace Constants
   const size_t CharWidth  =  8 * GlobalScale;
   const size_t CharHeight = 16 * GlobalScale;
 
+  const size_t CharWidthHalf  = CharWidth  * 0.5;
+  const size_t CharHeightHalf = CharHeight * 0.5;
+
   const size_t WindowCharWidth  = 80;
   const size_t WindowCharHeight = 20;
 

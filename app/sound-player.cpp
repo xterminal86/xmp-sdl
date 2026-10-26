@@ -2,6 +2,8 @@
 
 #include "utils.h"
 
+#include <cstring>
+
 #define STR(what) #what
 
 SoundPlayer::~SoundPlayer()
@@ -11,6 +13,9 @@ SoundPlayer::~SoundPlayer()
 }
 
 // =============================================================================
+
+std::vector<uint16_t> Spectrogram         = std::vector<uint16_t>(0x100, 0);
+std::vector<uint16_t> SpectrogramSnapshot = std::vector<uint16_t>(0x100, 0);
 
 static void AudioCallback(void* udata, unsigned char* stream, int len)
 {
@@ -22,7 +27,23 @@ static void AudioCallback(void* udata, unsigned char* stream, int len)
   switch (ec)
   {
     case 0:
-      break;
+    {
+      for (int i = 0; i < len; i++)
+      {
+        uint8_t ind = (uint8_t)stream[i];
+        Spectrogram[ind]++;
+        if (Spectrogram[ind] > 0xFF)
+        {
+          Spectrogram[ind] = 0xFF;
+        }
+      }
+
+      std::memcpy(SpectrogramSnapshot.data(),
+                  Spectrogram.data(),
+                  Spectrogram.size());
+      bzero(Spectrogram.data(), Spectrogram.size());
+    }
+    break;
 
     case -XMP_END:
     {
@@ -102,6 +123,17 @@ bool SoundPlayer::Init()
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", SDL_GetError());
     return false;
   }
+
+  /*
+  const char *const *lst= xmp_get_format_list();
+
+  size_t i = 0;
+  while (lst[i] != nullptr)
+  {
+    SDL_Log("%s", lst[i]);
+    i++;
+  }
+  */
 
   return true;
 }

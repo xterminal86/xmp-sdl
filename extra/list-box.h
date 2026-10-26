@@ -31,8 +31,9 @@ class ListBox
             int charPosY,
             int charWidth,
             int charHeight,
-            TG::Printer& printerRef)
-      : _printerRef(printerRef)
+            TG::Printer& printerRef,
+            uint8_t borderSize = 1)
+      : _printerRef(printerRef), _borderSize(borderSize)
     {
       _transform.x = charPosX;
       _transform.y = charPosY;
@@ -47,6 +48,21 @@ class ListBox
       _listItemWidth = _transform.w - 1;
 
       _itemBackground = std::string(_listItemWidth, ' ');
+
+      const size_t& cw  = Constants::CharWidth;
+      const size_t& ch  = Constants::CharHeight;
+      const size_t& cwh = Constants::CharWidthHalf;
+
+      int xstart = (int)_transform.x + (int)_transform.w;
+      int yend   = (int)_transform.y + (int)_transform.h;
+
+      _scrollButtonsPositions =
+      {
+        xstart * (int)cw + (int)cwh,
+        (int)_transform.y * (int)ch - (int)_borderSize,
+        xstart * (int)cw + (int)cwh,
+        yend * (int)ch
+      };
     }
 
     // =========================================================================
@@ -232,19 +248,29 @@ class ListBox
 
     // =========================================================================
 
+    const SDL_Rect& GetScrollButtonsPositions()
+    {
+      return _scrollButtonsPositions;
+    }
+
+    // =========================================================================
+
     void Draw()
     {
-      _printerRef.DrawFilledRect(_pixelPerfect.x - 2,
-                                 _pixelPerfect.y - 2,
-                                 _pixelPerfect.w + 4,
-                                 _pixelPerfect.h + 4,
-                                 TG::Colors::White);
+      if (_borderSize != 0)
+      {
+        _printerRef.DrawFilledRect(_pixelPerfect.x - _borderSize,
+                                   _pixelPerfect.y - _borderSize,
+                                   _pixelPerfect.w + _borderSize * 2,
+                                   _pixelPerfect.h + _borderSize * 2,
+                                   TG::Colors::White);
 
-      _printerRef.DrawFilledRect(_pixelPerfect.x,
-                                 _pixelPerfect.y,
-                                 _pixelPerfect.w,
-                                 _pixelPerfect.h,
-                                 TG::Colors::Black);
+        _printerRef.DrawFilledRect(_pixelPerfect.x,
+                                   _pixelPerfect.y,
+                                   _pixelPerfect.w,
+                                   _pixelPerfect.h,
+                                   TG::Colors::Black);
+      }
 
       size_t yPos = 0;
       for (size_t ind = _offset; ind < _items.size(); ind++)
@@ -348,6 +374,7 @@ class ListBox
 
     SDL_Rect _transform;
     SDL_Rect _pixelPerfect;
+    SDL_Rect _scrollButtonsPositions;
 
     std::vector<T> _items;
 
@@ -358,6 +385,8 @@ class ListBox
     TG::Printer& _printerRef;
 
     size_t _listItemWidth = 0;
+
+    uint8_t _borderSize = 1;
 
     std::string _itemBackground;
 };

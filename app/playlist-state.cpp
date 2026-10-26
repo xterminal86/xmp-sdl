@@ -20,7 +20,7 @@ const std::string kHighlighter(Constants::WindowCharWidthVisible - 2, ' ');
 void PlaylistState::Init()
 {
   _playlist = std::make_unique<ListBox<PlaylistItem>>(
-    0, 0, 40, Constants::WindowCharHeightVisible, _printerRef
+    0, 0, 40, Constants::WindowCharHeightVisible, _printerRef, 0
   );
 
   //_listItemWidth = (_playlist->Transform().w - 1);
@@ -346,6 +346,18 @@ void PlaylistState::DrawStuff()
   {
     b->Draw();
   }
+
+  for (uint8_t i = 0; i < 64; i++)
+  {
+    _printerRef.DrawFilledRect(
+      Constants::WindowWidth - (8 * i),
+      Constants::WindowHeight - SpectrogramSnapshot[i],
+      8,
+      SpectrogramSnapshot[i],
+      (0xFFFFFF & SpectrogramSnapshot[i]) << 8
+    );
+  }
+
 
 #ifdef DEBUG_BUILD
   //DrawDimensions();

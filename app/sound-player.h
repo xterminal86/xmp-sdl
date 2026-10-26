@@ -2,12 +2,15 @@
 #define SOUNDPLAYER_H
 
 #include <string>
+#include <vector>
 
 #include <SDL2/SDL.h>
 
 #include <xmp.h>
 
 #include "structs.h"
+
+extern std::vector<uint16_t> SpectrogramSnapshot;
 
 class SoundPlayer
 {

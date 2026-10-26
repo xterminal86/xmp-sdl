@@ -14,6 +14,11 @@ class Button
            const std::string& text,
            TG::Printer& printerRef);
 
+    Button(int px,
+           int py,
+           TG::NameCP437 glyph,
+           TG::Printer& printerRef);
+
     void Draw();
     void MouseDown(const MouseInfo& mi);
     void MouseUp(const MouseInfo& mi);
@@ -30,6 +35,8 @@ class Button
     SDL_Rect _pixelPerfect;
 
     std::string _text;
+
+    TG::NameCP437 _glyph = TG::NameCP437::FIRST;
 
     uint32_t _fgColor = TG::Colors::White;
     uint32_t _bgColor = TG::Colors::Black;
