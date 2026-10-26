@@ -347,17 +347,18 @@ void PlaylistState::DrawStuff()
     b->Draw();
   }
 
-  for (uint8_t i = 0; i < 64; i++)
+  /*
+  for (size_t i = 0; i < SpectrogramSnapshot.size(); i++)
   {
     _printerRef.DrawFilledRect(
-      Constants::WindowWidth - (8 * i),
+      Constants::WindowWidth - i,
       Constants::WindowHeight - SpectrogramSnapshot[i],
-      8,
+      1,
       SpectrogramSnapshot[i],
       (0xFFFFFF & SpectrogramSnapshot[i]) << 8
     );
   }
-
+  */
 
 #ifdef DEBUG_BUILD
   //DrawDimensions();
@@ -384,7 +385,7 @@ void PlaylistState::UpdatePlaylist()
         {
           std::string fname = entry.path().filename().string();
 
-          if (fname.length() >= _playlist->Transform().w - 2)
+          if ((int)fname.length() >= _playlist->Transform().w - 2)
           {
             fname.resize(_playlist->Transform().w - 2);
           }

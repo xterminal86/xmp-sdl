@@ -10,7 +10,7 @@
 
 #include "structs.h"
 
-extern std::vector<uint16_t> SpectrogramSnapshot;
+extern std::vector<uint8_t> SpectrogramSnapshot;
 
 class SoundPlayer
 {

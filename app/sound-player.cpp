@@ -14,10 +14,10 @@ SoundPlayer::~SoundPlayer()
 
 // =============================================================================
 
-std::vector<uint16_t> Spectrogram         = std::vector<uint16_t>(0x100, 0);
-std::vector<uint16_t> SpectrogramSnapshot = std::vector<uint16_t>(0x100, 0);
+std::vector<uint8_t> Spectrogram         = std::vector<uint8_t>(0x100, 0);
+std::vector<uint8_t> SpectrogramSnapshot = std::vector<uint8_t>(0x100, 0);
 
-static void AudioCallback(void* udata, unsigned char* stream, int len)
+static void AudioCallback(void* udata, uint8_t* stream, int len)
 {
   //
   // NOTE: last argument is the loop count. 0 - means play forever.
@@ -28,13 +28,18 @@ static void AudioCallback(void* udata, unsigned char* stream, int len)
   {
     case 0:
     {
+      // FIXME: SFFT
+      /*
       for (int i = 0; i < len; i++)
       {
-        uint8_t ind = (uint8_t)stream[i];
-        Spectrogram[ind]++;
-        if (Spectrogram[ind] > 0xFF)
+        uint8_t ind = stream[i];
+        if (ind > 127)
         {
-          Spectrogram[ind] = 0xFF;
+          Spectrogram[ind]++;
+        }
+        else
+        {
+          Spectrogram[ind] = 0;
         }
       }
 
@@ -42,6 +47,7 @@ static void AudioCallback(void* udata, unsigned char* stream, int len)
                   Spectrogram.data(),
                   Spectrogram.size());
       bzero(Spectrogram.data(), Spectrogram.size());
+      */
     }
     break;
 

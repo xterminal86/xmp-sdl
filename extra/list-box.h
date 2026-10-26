@@ -94,7 +94,7 @@ class ListBox
 
       int itemIndex = mouseInfo.CharPosY - (_transform.y + 1);
 
-      if (not mouseInside or _items.empty() or (itemIndex >= _items.size()))
+      if (not mouseInside or _items.empty() or (itemIndex >= (int)_items.size()))
       {
         return -1;
       }
@@ -137,7 +137,7 @@ class ListBox
 
     void SelectItem(int index)
     {
-      if (index < 0 or index >= _items.size())
+      if (index < 0 or index >= (int)_items.size())
       {
         return;
       }
@@ -275,7 +275,7 @@ class ListBox
       size_t yPos = 0;
       for (size_t ind = _offset; ind < _items.size(); ind++)
       {
-        if (ind == _itemIndex)
+        if ((int)ind == _itemIndex)
         {
           _printerRef.PrintFB(_transform.x + 1,
                               _transform.y + 1 + yPos,
@@ -352,7 +352,7 @@ class ListBox
 
         yPos++;
 
-        if (yPos > _transform.h - 2)
+        if ((int)yPos > _transform.h - 2)
         {
           break;
         }

@@ -4,6 +4,7 @@ project (${TARGET_NAME})
 
 add_definitions(-DUSE_SDL)
 
+add_compile_options(-Wall)
 add_compile_options(-Wfatal-errors)
 add_compile_options(-Werror=return-type)
 add_compile_options(-fmax-errors=1)

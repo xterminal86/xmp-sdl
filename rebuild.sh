@@ -5,6 +5,6 @@ BuildDir="cli-build"
 mkdir -p "${BuildDir}"
 cd "${BuildDir}" || exit 1
 rm -rf *
-cmake ../
+cmake -DCMAKE_BUILD_TYPE=Debug ../
 make
 

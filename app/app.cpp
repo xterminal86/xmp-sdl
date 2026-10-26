@@ -126,6 +126,8 @@ void Application::Run()
 {
   uint64_t drawTime = 0;
 
+  uint64_t updateAfter = 0;
+
   while (true)
   {
     while (SDL_PollEvent(&_event))
@@ -148,7 +150,7 @@ void Application::Run()
             {
               if (_appSettings.AlwaysOnTop == SDL_TRUE)
               {
-                _appSettings.AlwaysOnTop == SDL_FALSE;
+                _appSettings.AlwaysOnTop = SDL_FALSE;
               }
               else if (_appSettings.AlwaysOnTop == SDL_FALSE)
               {
@@ -177,6 +179,10 @@ void Application::Run()
 
     _appStates[_currentState]->DrawStuff();
 
-    _appStates[_currentState]->SetDrawTime(SDL_GetTicks64() - drawTime);
+    if (SDL_GetTicks64() - updateAfter > 1000)
+    {
+      updateAfter = SDL_GetTicks64();
+      _appStates[_currentState]->SetDrawTime(SDL_GetTicks64() - drawTime);
+    }
   }
 }
