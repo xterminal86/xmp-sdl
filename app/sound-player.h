@@ -10,7 +10,9 @@
 
 #include "structs.h"
 
-extern std::vector<uint8_t> SpectrogramSnapshot;
+extern std::vector<uint16_t> SpectrogramSnapshot;
+
+extern double VU;
 
 class SoundPlayer
 {

@@ -360,6 +360,18 @@ void PlaylistState::DrawStuff()
   }
   */
 
+  static const size_t meterWidth = 4;
+
+  int meterHeight = (int)(VU * (double)Constants::WindowHeight);
+
+  _printerRef.DrawFilledRect(
+    Constants::WindowWidth - meterWidth,
+    Constants::WindowHeight - meterHeight,
+    meterWidth,
+    meterHeight,
+    TG::Colors::Green
+  );
+
 #ifdef DEBUG_BUILD
   //DrawDimensions();
   DrawFPS();

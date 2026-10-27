@@ -14,8 +14,10 @@ SoundPlayer::~SoundPlayer()
 
 // =============================================================================
 
-std::vector<uint8_t> Spectrogram         = std::vector<uint8_t>(0x100, 0);
-std::vector<uint8_t> SpectrogramSnapshot = std::vector<uint8_t>(0x100, 0);
+std::vector<uint16_t> Spectrogram         = std::vector<uint16_t>(0x10000, 0);
+std::vector<uint16_t> SpectrogramSnapshot = std::vector<uint16_t>(0x10000, 0);
+
+double VU = 0.0;
 
 static void AudioCallback(void* udata, uint8_t* stream, int len)
 {
@@ -28,6 +30,20 @@ static void AudioCallback(void* udata, uint8_t* stream, int len)
   {
     case 0:
     {
+      int16_t* castedStream = (int16_t*)stream;
+      int samples = len / sizeof(int16_t);
+
+      int16_t max = std::numeric_limits<int16_t>::min();
+      for (int i = 0; i < samples; i++)
+      {
+        if (castedStream[i] > max)
+        {
+          max = castedStream[i];
+        }
+      }
+
+      VU = (double)max / 32768.0;
+
       // FIXME: SFFT
       /*
       for (int i = 0; i < len; i++)
