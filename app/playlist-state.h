@@ -27,7 +27,7 @@ class PlaylistState : public AppStateBase
 
 #ifdef DEBUG_BUILD
     void DrawDimensions();
-    void DrawFPS();
+    void DisplayDeltaTime();
     void DrawWindowSize();
     void DrawMouseInfo();
 #endif

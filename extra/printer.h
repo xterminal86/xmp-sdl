@@ -1062,6 +1062,94 @@ namespace TG
           }
         }
       }
+
+      // =======================================================================
+
+      void DrawLine(int x1, int y1, int x2, int y2, uint32_t color)
+      {
+        uint8_t oldR, oldG, oldB, oldA;
+        SDL_GetRenderDrawColor(_rendererRef, &oldR, &oldG, &oldB, &oldA);
+
+        ConvertHtmlToRGB(color);
+        SDL_SetRenderDrawColor(_rendererRef,
+                               _convertedHtml.R,
+                               _convertedHtml.G,
+                               _convertedHtml.B,
+                               0xFF);
+        SDL_RenderDrawLine(_rendererRef, x1, y1, x2, y2);
+
+        SDL_SetRenderDrawColor(_rendererRef, oldR, oldG, oldB, oldA);
+      }
+
+      // =======================================================================
+
+      void DrawGlyph(int x,
+                     int y,
+                     NameCP437 glyph,
+                     uint32_t fgColor,
+                     uint32_t bgColor,
+                     uint16_t angle = 0,
+                     SDL_RendererFlip flip = SDL_FLIP_NONE)
+      {
+        angle %= 360;
+
+        TileInfo& tile = _tiles[(int)glyph];
+
+        SDL_Rect src;
+        src.x = tile.X;
+        src.y = tile.Y;
+        src.w = _tileWidth;
+        src.h = _tileHeight;
+
+        SDL_Rect dst;
+        dst.x = x;
+        dst.y = y;
+        dst.w = _tileWidthScaled;
+        dst.h = _tileHeightScaled;
+
+        if (SDL_GetRenderTarget(_rendererRef) == nullptr)
+        {
+          SDL_SetRenderTarget(_rendererRef, _frameBuffer);
+        }
+
+        if (bgColor != Colors::None)
+        {
+          TileInfo& block = _tiles[(int)NameCP437::BLOCK];
+
+          SDL_Rect blockSrc;
+          blockSrc.x = block.X;
+          blockSrc.y = block.Y;
+          blockSrc.w = _tileWidth;
+          blockSrc.h = _tileHeight;
+
+          ConvertHtmlToRGB(bgColor);
+          SDL_SetTextureColorMod(_tileset,
+                                 _convertedHtml.R,
+                                 _convertedHtml.G,
+                                 _convertedHtml.B);
+          SDL_RenderCopyEx(_rendererRef,
+                           _tileset,
+                           &blockSrc,
+                           &dst,
+                           angle,
+                           nullptr,
+                           flip);
+        }
+
+        ConvertHtmlToRGB(fgColor);
+        SDL_SetTextureColorMod(_tileset,
+                               _convertedHtml.R,
+                               _convertedHtml.G,
+                               _convertedHtml.B);
+
+        SDL_RenderCopyEx(_rendererRef,
+                         _tileset,
+                         &src,
+                         &dst,
+                         angle,
+                         nullptr,
+                         flip);
+      }
   #endif
 
     private:

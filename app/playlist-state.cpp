@@ -65,7 +65,7 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
         b->MouseOver(_mouseClickData);
       }
 
-      _playlist->MouseOver(_mouseClickData);
+      _playlist->SetMouseHoverFlag(_mouseClickData);
     }
     break;
 
@@ -112,6 +112,24 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
         for (auto& b : _buttons)
         {
           b->MouseUp(_mouseClickData);
+        }
+      }
+    }
+    break;
+
+    // ---------------------------------------------------------------------
+
+    case SDL_MOUSEWHEEL:
+    {
+      if (_playlist->IsMouseInside(_mouseX, _mouseY))
+      {
+        if (evt.wheel.y < 0)
+        {
+          _playlist->ScrollDown();
+        }
+        else
+        {
+          _playlist->ScrollUp();
         }
       }
     }
@@ -220,7 +238,11 @@ void PlaylistState::TryToPlay()
   if (ind != -1)
   {
     _soundPlayerRef.Stop();
-    _soundPlayerRef.Play(_playlist->GetItem(ind)->URI);
+    if (not _soundPlayerRef.Play(_playlist->GetItem(ind)->URI))
+    {
+      _playlist->GetItem(ind)->IsValid = false;
+      VU = 0.0;
+    }
   }
 }
 
@@ -254,7 +276,7 @@ void PlaylistState::DrawDimensions()
 
 // =============================================================================
 
-void PlaylistState::DrawFPS()
+void PlaylistState::DisplayDeltaTime()
 {
   _printerRef.PrintFB(0,
                       Constants::WindowCharHeightVisible,
@@ -374,7 +396,7 @@ void PlaylistState::DrawStuff()
 
 #ifdef DEBUG_BUILD
   //DrawDimensions();
-  DrawFPS();
+  DisplayDeltaTime();
   //DrawWindowSize();
   DrawMouseInfo();
 #endif

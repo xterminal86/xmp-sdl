@@ -17,7 +17,9 @@ struct PlaylistItem
 
   xmp_module_info ModuleInfo;
 
-  std::string ToString()
+  bool IsValid = true;
+
+  const std::string& ToString() const
   {
     return Filename;
   }

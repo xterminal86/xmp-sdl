@@ -12,13 +12,13 @@
 #include "printer.h"
 
 template <typename T>
-concept HasToString = requires(T a)
+concept HasToString = requires(const T& a)
 {
-  { a.ToString() } -> std::convertible_to<std::string>;
+  { a.ToString() } -> std::same_as<const std::string&>;
 };
 
 template <typename T>
-concept IsString = std::is_same_v<std::remove_cvref_t<T>, std::string>;
+concept IsString = std::is_same_v< std::remove_cvref_t<T>, std::string >;
 
 template <typename T>
 concept StringRepresentable = HasToString<T> or IsString<T>;
@@ -67,7 +67,7 @@ class ListBox
 
     // =========================================================================
 
-    void MouseOver(const MouseInfo& mi)
+    void SetMouseHoverFlag(const MouseInfo& mi)
     {
       _hoverFlag = IsMouseInside(mi);
     }
@@ -306,6 +306,20 @@ class ListBox
                                   TG::Colors::White,
                                   TG::Colors::Blue);
             }
+
+            if constexpr (not std::is_same_v<std::remove_cvref_t<T>, std::string>)
+            {
+              if (not item->IsValid)
+              {
+                _printerRef.DrawFilledRect(
+                  _transform.x * Constants::CharWidth,
+                  (_transform.y + 1 + yPos) * Constants::CharHeight + Constants::CharHeightHalf,
+                  _transform.w * Constants::CharWidth,
+                  4,
+                  TG::Colors::Red
+                );
+              }
+            }
           }
           else
           {
@@ -339,6 +353,20 @@ class ListBox
                                   TG::Printer::kAlignLeft,
                                   TG::Colors::White);
             }
+
+            if constexpr (not std::is_same_v<std::remove_cvref_t<T>, std::string>)
+            {
+              if (not item->IsValid)
+              {
+                _printerRef.DrawFilledRect(
+                  _transform.x * Constants::CharWidth,
+                  (_transform.y + 1 + yPos) * Constants::CharHeight + Constants::CharHeightHalf,
+                  _transform.w * Constants::CharWidth,
+                  4,
+                  TG::Colors::Red
+                );
+              }
+            }
           }
           else
           {
@@ -359,7 +387,20 @@ class ListBox
       }
     }
 
-  private:
+    // =========================================================================
+
+    bool IsMouseInside(int mx, int my)
+    {
+      return (
+            mx >= _pixelPerfect.x
+        and mx <= _pixelPerfect.x + _pixelPerfect.w
+        and my >= _pixelPerfect.y
+        and my <= _pixelPerfect.y + _pixelPerfect.h
+      );
+    }
+
+    // =========================================================================
+
     bool IsMouseInside(const MouseInfo& mi)
     {
       return (
@@ -370,6 +411,7 @@ class ListBox
       );
     }
 
+  private:
     bool _hoverFlag = false;
 
     SDL_Rect _transform;

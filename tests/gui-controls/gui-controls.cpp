@@ -66,7 +66,13 @@ void Draw()
 
   List->Draw();
 
-  // FPS
+  Printer.DrawGlyph(100, 30, TG::NameCP437::UARROW_1, TG::Colors::White, TG::Colors::Red, 0);
+  Printer.DrawGlyph(100, 62, TG::NameCP437::UARROW_1, TG::Colors::White, TG::Colors::Red, 45);
+  Printer.DrawGlyph(100, 94, TG::NameCP437::UARROW_1, TG::Colors::White, TG::Colors::Red, 90);
+
+  Printer.DrawLine(800, 200, 850, 300, TG::Colors::Yellow);
+
+  // delta time
   Printer.PrintFB(Constants::WindowCharWidthVisible,
                   Constants::WindowCharHeightVisible,
                   std::to_string(DeltaTime),
@@ -253,7 +259,7 @@ int main(int argc, char* argv[])
             b->MouseOver(mi);
           }
 
-          List->MouseOver(mi);
+          List->SetMouseHoverFlag(mi);
         }
         break;
 
