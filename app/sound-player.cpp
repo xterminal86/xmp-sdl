@@ -348,5 +348,7 @@ void SoundPlayer::Stop()
 
     xmp_end_player(_xmpContext);
     xmp_release_module(_xmpContext);
+
+    VU = 0.0;
   }
 }

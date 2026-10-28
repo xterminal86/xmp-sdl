@@ -181,7 +181,7 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
             _playlist->ScrollDown();
           }
 
-          SDL_Log("List box index = %d", curItem);
+          //SDL_Log("List box index = %d", curItem);
         }
         break;
 
@@ -197,7 +197,7 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
             _playlist->ScrollUp();
           }
 
-          SDL_Log("List box index = %d", curItem);
+          //SDL_Log("List box index = %d", curItem);
         }
         break;
 
