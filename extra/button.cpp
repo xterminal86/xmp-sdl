@@ -8,21 +8,29 @@ Button::Button(size_t charPosX,
                TG::Printer& printerRef)
   : _printerRef(printerRef), _text(text)
 {
+  SDL_Log("<Button '%s'>", text.data());
+
   _transform.x = charPosX;
   _transform.y = charPosY;
   _transform.w = text.length() + 2;
   _transform.h = 2;
+
+  SDL_Log("T: %d %d - %d %d",
+          _transform.x,
+          _transform.y,
+          _transform.w,
+          _transform.h);
 
   _pixelPerfect.x = charPosX * Constants::CharWidth + Constants::CharWidth / 2 + 2;
   _pixelPerfect.y = charPosY * Constants::CharHeight + Constants::CharHeight / 2;
   _pixelPerfect.w = _transform.w * Constants::CharWidth - Constants::CharWidth - 4;
   _pixelPerfect.h = _transform.h * Constants::CharHeight - 2;
 
-  //SDL_Log("%d %d - %d %d",
-  //        _pixelPerfect.x,
-  //        _pixelPerfect.y,
-  //        _pixelPerfect.w,
-  //        _pixelPerfect.h);
+  SDL_Log("PP: %d %d - %d %d",
+          _pixelPerfect.x,
+          _pixelPerfect.y,
+          _pixelPerfect.w,
+          _pixelPerfect.h);
 }
 
 // =============================================================================

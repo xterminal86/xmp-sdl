@@ -179,7 +179,7 @@ void Application::Run()
 
     _appStates[_currentState]->DrawStuff();
 
-    if (SDL_GetTicks64() - updateAfter > 1000)
+    if (SDL_GetTicks64() - updateAfter > 500)
     {
       updateAfter = SDL_GetTicks64();
       _appStates[_currentState]->SetDrawTime(SDL_GetTicks64() - drawTime);

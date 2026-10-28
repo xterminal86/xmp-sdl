@@ -163,6 +163,8 @@ int main(int argc, char* argv[])
 
   MouseInfo mi;
 
+  uint64_t updateAfter = 0;
+
   while (true)
   {
     while (SDL_PollEvent(&evt))
@@ -265,6 +267,24 @@ int main(int argc, char* argv[])
 
         // ---------------------------------------------------------------------
 
+        case SDL_MOUSEWHEEL:
+        {
+          if (List->IsMouseInside(evt.wheel.mouseX, evt.wheel.mouseY))
+          {
+            if (evt.wheel.y < 0)
+            {
+              List->ScrollDown();
+            }
+            else
+            {
+              List->ScrollUp();
+            }
+          }
+        }
+        break;
+
+        // ---------------------------------------------------------------------
+
         case SDL_QUIT:
         {
           goto l_exit;
@@ -282,7 +302,11 @@ int main(int argc, char* argv[])
 
     Draw();
 
-    DeltaTime = SDL_GetTicks64() - dt;
+    if (SDL_GetTicks64() - updateAfter > 500)
+    {
+      updateAfter = SDL_GetTicks64();
+      DeltaTime = SDL_GetTicks64() - dt;
+    }
   }
 
 l_exit:
