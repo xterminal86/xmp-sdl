@@ -6,7 +6,7 @@ Button::Button(size_t charPosX,
                size_t charPosY,
                const std::string& text,
                TG::Printer& printerRef)
-  : _printerRef(printerRef), _text(text)
+  : GUIControl(printerRef), _text(text)
 {
   //SDL_Log("<Button '%s'>", text.data());
 
@@ -36,7 +36,7 @@ Button::Button(size_t charPosX,
 // =============================================================================
 
 Button::Button(int px, int py, TG::NameCP437 glyph, TG::Printer& printerRef)
-  : _printerRef(printerRef), _glyph(glyph)
+  : GUIControl(printerRef), _glyph(glyph)
 {
   _transform.x = px;
   _transform.y = py;
@@ -50,54 +50,6 @@ Button::Button(int px, int py, TG::NameCP437 glyph, TG::Printer& printerRef)
   _pixelPerfect.w = _transform.w;
   _pixelPerfect.h = _transform.h;
 
-}
-
-// =============================================================================
-
-bool Button::IsMouseInside(const MouseInfo& mi)
-{
-  return (
-        mi.X >= _pixelPerfect.x
-    and mi.X <= _pixelPerfect.x + _pixelPerfect.w
-    and mi.Y >= _pixelPerfect.y
-    and mi.Y <= _pixelPerfect.y + _pixelPerfect.h
-  );
-}
-
-// =============================================================================
-
-void Button::MouseDown(const MouseInfo& mi)
-{
-  if (IsMouseInside(mi))
-  {
-    _mdownFlag = true;
-    _fgColor = TG::Colors::Black;
-    _bgColor = TG::Colors::White;
-  }
-}
-
-// =============================================================================
-
-void Button::MouseUp(const MouseInfo& mi)
-{
-  if (IsMouseInside(mi) or _mdownFlag)
-  {
-    _mdownFlag = false;
-    _fgColor = TG::Colors::White;
-    _bgColor = TG::Colors::Black;
-
-    if (OnClick.target_type() != typeid(void))
-    {
-      OnClick();
-    }
-  }
-}
-
-// =============================================================================
-
-void Button::MouseOver(const MouseInfo& mi)
-{
-  _hoverFlag = IsMouseInside(mi);
 }
 
 // =============================================================================

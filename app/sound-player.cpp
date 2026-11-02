@@ -268,7 +268,7 @@ xmp_module_info* SoundPlayer::GetCurrentModuleInfo()
 
 // =============================================================================
 
-bool SoundPlayer::Play(const std::string& uri)
+bool SoundPlayer::Play(const std::string& uri, int pos)
 {
   bool res = false;
 
@@ -304,6 +304,18 @@ bool SoundPlayer::Play(const std::string& uri)
       // NOTE: must be set in "playing state" (i.e. after xmp_start_player())
       SetParam(STR(XMP_PLAYER_INTERP), XMP_PLAYER_INTERP, XMP_INTERP_SPLINE);
       //SetParam(STR(XMP_PLAYER_INTERP), XMP_PLAYER_INTERP, XMP_INTERP_NEAREST);
+
+      if (pos >= 0)
+      {
+        int ec = xmp_set_position(_xmpContext, pos);
+        if (ec == -XMP_ERROR_INVALID or ec == -XMP_ERROR_STATE)
+        {
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+                      "xmp_set_position(%d) failed: %s",
+                      pos,
+                      strerror(xmp_syserrno()));
+        }
+      }
 
       SDL_PauseAudioDevice(_audioDevice, 0);
       res = true;

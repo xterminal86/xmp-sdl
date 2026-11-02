@@ -169,6 +169,23 @@ void PlaylistState::HandleEvent(const SDL_Event& evt)
         }
         break;
 
+        // TODO: rewinding
+        case SDLK_1:
+        {
+          int ind = _playlist->GetCurrentItemIndex();
+          if (ind != -1)
+          {
+            _soundPlayerRef.Stop();
+            if (not _soundPlayerRef.Play(_playlist->GetItem(ind)->URI, 3))
+            {
+              _playlist->GetItem(ind)->IsValid = false;
+              VU = 0.0;
+            }
+          }
+        }
+        break;
+
+
         // -----------------------------------------------------------------
 
         case SDLK_DOWN:

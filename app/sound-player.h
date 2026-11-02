@@ -21,7 +21,8 @@ class SoundPlayer
 
     bool Init();
 
-    bool Play(const std::string& uri);
+    bool Play(const std::string& uri, int pos = 0);
+
     void Stop();
 
     xmp_module_info* GetCurrentModuleInfo();

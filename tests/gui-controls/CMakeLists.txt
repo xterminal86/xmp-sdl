@@ -18,15 +18,10 @@ file(
   GLOB
   SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../extra/button.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../extra/constants.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../extra/utils.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../extra/*.cpp
 
   ${CMAKE_CURRENT_SOURCE_DIR}/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../extra/button.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../extra/list-box.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../extra/constants.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../extra/utils.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../extra/*.h
 )
 
 add_executable(${TARGET_NAME} ${SOURCES})
