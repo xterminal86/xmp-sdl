@@ -7,6 +7,7 @@
 #include "printer.h"
 #include "constants.h"
 #include "button.h"
+#include "slider.h"
 #include "list-box.h"
 #include "utils.h"
 
@@ -20,6 +21,9 @@ uint64_t DeltaTime = 0;
 std::vector<std::unique_ptr<Button>> Buttons;
 
 std::unique_ptr<ListBox<std::string>> List;
+
+std::unique_ptr<Slider> SliderH;
+std::unique_ptr<Slider> SliderV;
 
 int64_t Counter = 0;
 
@@ -45,6 +49,9 @@ void InitControls()
   {
     Counter--;
   };
+
+  SliderH = std::make_unique<Slider>(300, 100, 200, 10, false, Printer);
+  SliderV = std::make_unique<Slider>(700, 200, 200, 300, true, Printer);
 }
 
 // =============================================================================
@@ -78,6 +85,9 @@ void Draw()
                   std::to_string(DeltaTime),
                   TG::Printer::kAlignRight,
                   TG::Colors::Yellow);
+
+  SliderH->Draw();
+  SliderV->Draw();
 
   Printer.Render();
 }
@@ -230,6 +240,9 @@ int main(int argc, char* argv[])
             }
 
             List->MouseToItemIndex(mi);
+
+            SliderH->MouseDown(mi);
+            SliderV->MouseDown(mi);
           }
         }
         break;
@@ -246,6 +259,9 @@ int main(int argc, char* argv[])
             {
               b->MouseUp(mi);
             }
+
+            SliderH->MouseUp(mi);
+            SliderV->MouseUp(mi);
           }
         }
         break;
@@ -262,6 +278,9 @@ int main(int argc, char* argv[])
           }
 
           List->SetMouseHoverFlag(mi);
+
+          SliderH->MouseOver(mi);
+          SliderV->MouseOver(mi);
         }
         break;
 

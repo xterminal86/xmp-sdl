@@ -9,6 +9,7 @@ class GUIControl
 {
   public:
     GUIControl(TG::Printer& printerRef);
+    virtual ~GUIControl();
 
     virtual void Draw() = 0;
 
@@ -17,6 +18,11 @@ class GUIControl
     void MouseOver(const MouseInfo& mi);
 
     Callback OnClick;
+
+    void Move(int px, int py);
+
+    const SDL_Rect& Transform();
+    const SDL_Rect& TransformPP();
 
   protected:
     bool IsMouseInside(const MouseInfo& mi);
@@ -31,6 +37,8 @@ class GUIControl
 
     bool _hoverFlag = false;
     bool _mdownFlag = false;
+
+    const uint32_t kHoverColor = TG::Colors::ShadesOfGrey::Five;
 };
 
 #endif // GUICONTROL_H

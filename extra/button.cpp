@@ -35,11 +35,16 @@ Button::Button(size_t charPosX,
 
 // =============================================================================
 
-Button::Button(int px, int py, TG::NameCP437 glyph, TG::Printer& printerRef)
-  : GUIControl(printerRef), _glyph(glyph)
+Button::Button(int px,
+               int py,
+               TG::NameCP437 glyph,
+               uint16_t angle,
+               TG::Printer& printerRef)
+  : GUIControl(printerRef), _glyph(glyph), _angle(angle)
 {
   _transform.x = px;
   _transform.y = py;
+
   _transform.w = Constants::CharWidth * 2;
 
   // To compensate for glyph's background.
@@ -94,9 +99,7 @@ void Button::Draw()
                                _pixelPerfect.y + kButtonBorderSize,
                                _pixelPerfect.w - kBorderSizeDoubled,
                                _pixelPerfect.h - kBorderSizeDoubled,
-                               _hoverFlag ?
-                               TG::Colors::ShadesOfGrey::Four :
-                               _bgColor);
+                               _hoverFlag ? kHoverColor : _bgColor);
 
     if (_glyph != TG::NameCP437::FIRST)
     {
@@ -104,9 +107,7 @@ void Button::Draw()
                           _transform.y + 2,
                           _glyph,
                           _fgColor,
-                          _hoverFlag ?
-                          TG::Colors::ShadesOfGrey::Four :
-                          _bgColor);
+                          _hoverFlag ? kHoverColor : _bgColor);
     }
     else
     {
@@ -115,9 +116,7 @@ void Button::Draw()
                           _text,
                           TG::Printer::kAlignLeft,
                           _fgColor,
-                          _hoverFlag ?
-                          TG::Colors::ShadesOfGrey::Four :
-                          _bgColor);
+                          _hoverFlag ? kHoverColor : _bgColor);
     }
   }
 }

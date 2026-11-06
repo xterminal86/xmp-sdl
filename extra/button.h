@@ -18,6 +18,7 @@ class Button : public GUIControl
     Button(int px,
            int py,
            TG::NameCP437 glyph,
+           uint16_t angle,
            TG::Printer& printerRef);
 
     void Draw() override;
@@ -26,6 +27,8 @@ class Button : public GUIControl
     std::string _text;
 
     TG::NameCP437 _glyph = TG::NameCP437::FIRST;
+
+    uint16_t _angle = 0;
 
     const size_t kButtonBorderSize = 2;
     const size_t kBorderSizeDoubled = kButtonBorderSize * 2;

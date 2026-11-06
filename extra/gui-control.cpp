@@ -4,6 +4,21 @@ GUIControl::GUIControl(TG::Printer &printerRef) : _printerRef(printerRef) {}
 
 // =============================================================================
 
+GUIControl::~GUIControl() {}
+
+// =============================================================================
+
+void GUIControl::Move(int px, int py)
+{
+  _transform.x = px;
+  _transform.y = py;
+
+  _pixelPerfect.x = px;
+  _pixelPerfect.y = py;
+}
+
+// =============================================================================
+
 void GUIControl::MouseDown(const MouseInfo& mi)
 {
   if (IsMouseInside(mi))
@@ -48,4 +63,18 @@ bool GUIControl::IsMouseInside(const MouseInfo& mi)
     and mi.Y >= _pixelPerfect.y
     and mi.Y <= _pixelPerfect.y + _pixelPerfect.h
   );
+}
+
+// =============================================================================
+
+const SDL_Rect& GUIControl::Transform()
+{
+  return _transform;
+}
+
+// =============================================================================
+
+const SDL_Rect& GUIControl::TransformPP()
+{
+  return _pixelPerfect;
 }
