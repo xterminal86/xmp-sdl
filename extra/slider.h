@@ -29,14 +29,21 @@ class Slider : public GUIControl
   private:
     bool InsideMarker(const MouseInfo& mi);
 
-    void ClampMarker(const MouseInfo& mi);
+    void MoveMarker(const MouseInfo& mi);
+    void ClampMarker();
+
     void AlignMarker();
+    void UpdateMarkerPos();
+    void UpdateValueCounter();
 
     int _px;
     int _py;
 
     size_t _barSize;
     size_t _values;
+
+    size_t _markerPosX;
+    size_t _markerPosY;
 
     int _valueCounter;
 

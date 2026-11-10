@@ -102,22 +102,26 @@ Slider::Slider(int px,
 
   _btnLeft->OnClick = [this]()
   {
-    _valueCounter -= (int)_scrollAmount;
+    _valueCounter--;
 
     if (_valueCounter < 0)
     {
       _valueCounter = 0;
     }
+
+    _ratio = (double)_valueCounter / (double)_values;
   };
 
   _btnRight->OnClick = [this]()
   {
-    _valueCounter += (int)_scrollAmount;
+    _valueCounter++;
 
     if (_valueCounter >= (int)_values)
     {
       _valueCounter = _values;
     }
+
+    _ratio = (double)_valueCounter / (double)_values;
   };
 
   _markerTransform.x = _transform.x;
@@ -132,34 +136,30 @@ void Slider::Draw()
 {
   _printerRef.DrawFilledRect(_transform.x,
                              _transform.y,
-                             _transform.w,
-                             _transform.h,
+                             (not _isVertical ?
+                              (_transform.w + _markerSize) :
+                              _transform.w),
+                             (_isVertical ?
+                              (_transform.h + _markerSize) :
+                              _transform.h),
                              TG::Colors::White);
 
   _printerRef.DrawFilledRect(_transform.x + 2,
                              _transform.y + 2,
-                             _transform.w - 4,
-                             _transform.h - 4,
+                             (not _isVertical ?
+                              (_transform.w - 4 + _markerSize) :
+                              _transform.w - 4),
+                             (_isVertical ?
+                              (_transform.h - 4 + _markerSize) :
+                              _transform.h - 4),
                              (_values == 0) ? TG::Colors::Black :
                              _hoverFlag ? kHoverColor : TG::Colors::Black);
 
-  size_t markerPosX = (
-    _isVertical ?
-    _markerTransform.x :
-    _markerTransform.x + (_scrollStep * _valueCounter)
-  );
-
-  size_t markerPosY = (
-    _isVertical ?
-    _markerTransform.y + (_scrollStep * _valueCounter) :
-    _markerTransform.y
-  );
-
   _printerRef.DrawFilledRect(
-    markerPosX,
-    markerPosY,
-    _markerSize,
-    _markerSize,
+    _markerTransform.x,
+    _markerTransform.y,
+    _markerTransform.w,
+    _markerTransform.h,
     TG::Colors::White
   );
 
@@ -167,11 +167,13 @@ void Slider::Draw()
   _btnRight->Draw();
 
   // DEBUG:
-  _printerRef.PrintFB(_transform.x / Constants::CharWidth,
-                      _transform.y / Constants::CharHeight,
-                      std::format("{}", _ratio),
-                      TG::Printer::kAlignLeft,
-                      TG::Colors::Yellow);
+  _printerRef.PrintFB(
+      _transform.x / Constants::CharWidth
+    , _transform.y / Constants::CharHeight
+    , std::format("{} ({:.2f})", (int)(_ratio * (double)_values), _ratio)
+    , TG::Printer::kAlignLeft
+    , TG::Colors::Yellow
+  );
 }
 
 // =============================================================================
@@ -198,7 +200,7 @@ void Slider::MouseDown(const MouseInfo& mi)
 
   if (not _markerGrabbed and _mdownFlag)
   {
-    ClampMarker(mi);
+    MoveMarker(mi);
 
     _markerGrabbed = true;
   }
@@ -217,6 +219,7 @@ void Slider::MouseUp(const MouseInfo& mi)
   {
     _markerGrabbed = false;
     AlignMarker();
+    UpdateValueCounter();
   }
 }
 
@@ -231,18 +234,33 @@ void Slider::MouseOver(const MouseInfo& mi)
 
   if (_markerGrabbed)
   {
-    ClampMarker(mi);
+    MoveMarker(mi);
   }
 }
 
 // =============================================================================
 
-void Slider::ClampMarker(const MouseInfo& mi)
+void Slider::MoveMarker(const MouseInfo& mi)
 {
   if (_isVertical)
   {
     _markerTransform.y = mi.Y;
+  }
+  else
+  {
+    _markerTransform.x = mi.X;
+  }
 
+  ClampMarker();
+  UpdateValueCounter();
+}
+
+// =============================================================================
+
+void Slider::ClampMarker()
+{
+  if (_isVertical)
+  {
     if (_markerTransform.y < _transform.y)
     {
       _markerTransform.y = _transform.y;
@@ -252,13 +270,9 @@ void Slider::ClampMarker(const MouseInfo& mi)
     {
       _markerTransform.y = _transform.y + _transform.h;
     }
-
-    _ratio = ((double)_markerTransform.y / (double)(_transform.y + _transform.h));
   }
   else
   {
-    _markerTransform.x = mi.X;
-
     if (_markerTransform.x < _transform.x)
     {
       _markerTransform.x = _transform.x;
@@ -268,8 +282,6 @@ void Slider::ClampMarker(const MouseInfo& mi)
     {
       _markerTransform.x = _transform.x + _transform.w;
     }
-
-    _ratio = ((double)_markerTransform.x / (double)(_transform.x + _transform.w));
   }
 }
 
@@ -301,4 +313,53 @@ void Slider::AlignMarker()
   }
 }
 
+// =============================================================================
 
+void Slider::UpdateMarkerPos()
+{
+  /*
+  _markerPosX = (
+    _isVertical ?
+    _markerTransform.x :
+    _markerTransform.x + ((int)(_ratio * (double)_values) * _markerSize)
+  );
+
+  _markerPosY = (
+    _isVertical ?
+    _markerTransform.y + ((int)(_ratio * (double)_values) * _markerSize) :
+    _markerTransform.y
+  );
+  */
+
+  /*
+  _markerPosX = (
+    _isVertical ?
+    _markerTransform.x :
+    _markerTransform.x + (_scrollStep * _valueCounter)
+  );
+
+  _markerPosY = (
+    _isVertical ?
+    _markerTransform.y + (_scrollStep * _valueCounter) :
+    _markerTransform.y
+  );
+  */
+}
+
+// =============================================================================
+
+void Slider::UpdateValueCounter()
+{
+  if (_isVertical)
+  {
+    _ratio = (double)(_markerTransform.y - _transform.y) / (double)(_transform.h);
+  }
+  else
+  {
+    _ratio = (double)(_markerTransform.x - _transform.x) / (double)(_transform.w);
+  }
+
+  _valueCounter = (int)(_ratio * (double)_values);
+
+  _ratio = (double)_valueCounter / (double)_values;
+}
