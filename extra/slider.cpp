@@ -25,8 +25,8 @@ Slider::Slider(int px,
 
   _valueCounter = 0;
 
-  // TODO: unify sizes and draw the same rotated glyphs (LARROW_1 and RARROW_1)
-  // for vertical variant.
+  // TODO: draw the same rotated glyphs (LARROW_1 and RARROW_1)
+  // for vertical and horizontal variant (adjust sizes as needed).
 
   if (_isVertical)
   {
@@ -51,7 +51,7 @@ Slider::Slider(int px,
     _pixelPerfect.x = px;
     _pixelPerfect.y = py;
     _pixelPerfect.w = _btnLeft->TransformPP().w;
-    _pixelPerfect.h = _barSize;
+    _pixelPerfect.h = _barSize + _markerSize;
   }
   else
   {
@@ -75,7 +75,7 @@ Slider::Slider(int px,
 
     _pixelPerfect.x = px;
     _pixelPerfect.y = py;
-    _pixelPerfect.w = _barSize;
+    _pixelPerfect.w = _barSize + _markerSize;
     _pixelPerfect.h = _btnLeft->TransformPP().h;
   }
 
@@ -84,20 +84,16 @@ Slider::Slider(int px,
     if (_barSize > _values)
     {
       _scrollAmount = 1;
-
-      _scrollStep     = _barSize / _values;
-      _scrollLeftover = _barSize % _values;
+      _scrollStep   = _barSize / _values;
     }
     else
     {
       _scrollAmount = _values / _barSize;
-
-      _scrollStep     = 1;
-      _scrollLeftover = 0;
+      _scrollStep   = 1;
     }
 
-    SDL_Log("scroll amount = %lu scroll step = %lu, scroll leftover = %lu",
-            _scrollAmount, _scrollStep, _scrollLeftover);
+    SDL_Log("scroll amount = %lu scroll step = %lu",
+            _scrollAmount, _scrollStep);
   }
 
   _btnLeft->OnClick = [this]()
@@ -273,11 +269,11 @@ void Slider::MoveMarker(const MouseInfo& mi)
 {
   if (_isVertical)
   {
-    _markerTransform.y = mi.Y;
+    _markerTransform.y = mi.Y - _markerSizeHalf;
   }
   else
   {
-    _markerTransform.x = mi.X;
+    _markerTransform.x = mi.X - _markerSizeHalf;
   }
 
   ClampMarker();
@@ -362,11 +358,13 @@ void Slider::UpdateValueCounter()
 {
   if (_isVertical)
   {
-    _ratio = (double)(_markerTransform.y - _transform.y) / (double)(_transform.h);
+    _ratio =
+      (double)(_markerTransform.y - _transform.y) / (double)(_transform.h);
   }
   else
   {
-    _ratio = (double)(_markerTransform.x - _transform.x) / (double)(_transform.w);
+    _ratio =
+      (double)(_markerTransform.x - _transform.x) / (double)(_transform.w);
   }
 
   _valueCounter = (int)(_ratio * (double)_values);

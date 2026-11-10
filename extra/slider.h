@@ -51,7 +51,6 @@ class Slider : public GUIControl
 
     size_t _scrollAmount = 1;
     size_t _scrollStep = 1;
-    size_t _scrollLeftover = 0;
 
     bool _isVertical;
 
@@ -61,6 +60,7 @@ class Slider : public GUIControl
     std::unique_ptr<Button> _btnRight;
 
     const size_t _markerSize = 32;
+    const size_t _markerSizeHalf = _markerSize / 2;
 
     bool _markerGrabbed = false;
 
