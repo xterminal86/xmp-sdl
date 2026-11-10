@@ -35,13 +35,13 @@ Slider::Slider(int px,
     _transform.h = _barSize;
 
     _btnLeft = std::make_unique<Button>(_transform.x,
-                                        _transform.y  - Constants::CharWidth * 2 - 50,
+                                        _transform.y  - _markerSize,
                                         TG::NameCP437::UARROW_1,
                                         0,
                                         printerRef);
 
     _btnRight = std::make_unique<Button>(_transform.x,
-                                         _transform.y  + _transform.h + 50,
+                                         _transform.y  + _transform.h + _markerSize,
                                          TG::NameCP437::DARROW_1,
                                          0,
                                          printerRef);
@@ -59,13 +59,13 @@ Slider::Slider(int px,
     _transform.y = py;
     _transform.w = _barSize;
 
-    _btnLeft = std::make_unique<Button>(_transform.x - Constants::CharWidth * 2 - 50,
+    _btnLeft = std::make_unique<Button>(_transform.x - _markerSize,
                                         _transform.y,
                                         TG::NameCP437::LARROW_1,
                                         0,
                                         printerRef);
 
-    _btnRight = std::make_unique<Button>(_transform.x + _transform.w + 50,
+    _btnRight = std::make_unique<Button>(_transform.x + _transform.w + _markerSize,
                                          _transform.y,
                                          TG::NameCP437::RARROW_1,
                                          0,
@@ -110,6 +110,8 @@ Slider::Slider(int px,
     }
 
     _ratio = (double)_valueCounter / (double)_values;
+
+    UpdateMarkerPos();
   };
 
   _btnRight->OnClick = [this]()
@@ -122,12 +124,17 @@ Slider::Slider(int px,
     }
 
     _ratio = (double)_valueCounter / (double)_values;
+
+    UpdateMarkerPos();
   };
 
   _markerTransform.x = _transform.x;
   _markerTransform.y = _transform.y;
   _markerTransform.w = _markerSize;
   _markerTransform.h = _markerSize;
+
+  _zeroMarkerPosX = _markerTransform.x;
+  _zeroMarkerPosY = _markerTransform.y;
 }
 
 // =============================================================================
@@ -166,14 +173,29 @@ void Slider::Draw()
   _btnLeft->Draw();
   _btnRight->Draw();
 
+  //
   // DEBUG:
-  _printerRef.PrintFB(
-      _transform.x / Constants::CharWidth
-    , _transform.y / Constants::CharHeight
-    , std::format("{} ({:.2f})", (int)(_ratio * (double)_values), _ratio)
-    , TG::Printer::kAlignLeft
-    , TG::Colors::Yellow
-  );
+  //
+  if (_isVertical)
+  {
+    _printerRef.PrintFB(
+        _transform.x / Constants::CharWidth + 3
+      , _transform.y / Constants::CharHeight + 1
+      , std::format("{} ({:.2f})", _valueCounter, _ratio)
+      , TG::Printer::kAlignLeft
+      , TG::Colors::Yellow
+    );
+  }
+  else
+  {
+    _printerRef.PrintFB(
+        _transform.x / Constants::CharWidth + 2
+      , _transform.y / Constants::CharHeight - 1
+      , std::format("{} ({:.2f})", _valueCounter, _ratio)
+      , TG::Printer::kAlignLeft
+      , TG::Colors::Yellow
+    );
+  }
 }
 
 // =============================================================================
@@ -236,6 +258,13 @@ void Slider::MouseOver(const MouseInfo& mi)
   {
     MoveMarker(mi);
   }
+}
+
+// =============================================================================
+
+int Slider::GetValue()
+{
+  return _valueCounter;
 }
 
 // =============================================================================
@@ -317,33 +346,14 @@ void Slider::AlignMarker()
 
 void Slider::UpdateMarkerPos()
 {
-  /*
-  _markerPosX = (
-    _isVertical ?
-    _markerTransform.x :
-    _markerTransform.x + ((int)(_ratio * (double)_values) * _markerSize)
-  );
-
-  _markerPosY = (
-    _isVertical ?
-    _markerTransform.y + ((int)(_ratio * (double)_values) * _markerSize) :
-    _markerTransform.y
-  );
-  */
-
-  /*
-  _markerPosX = (
-    _isVertical ?
-    _markerTransform.x :
-    _markerTransform.x + (_scrollStep * _valueCounter)
-  );
-
-  _markerPosY = (
-    _isVertical ?
-    _markerTransform.y + (_scrollStep * _valueCounter) :
-    _markerTransform.y
-  );
-  */
+  if (_isVertical)
+  {
+    _markerTransform.y = _zeroMarkerPosY + (int)(_ratio * (double)_transform.h);
+  }
+  else
+  {
+    _markerTransform.x = _zeroMarkerPosX + (int)(_ratio * (double)_transform.w);
+  }
 }
 
 // =============================================================================

@@ -26,6 +26,8 @@ class Slider : public GUIControl
     void MouseUp(const MouseInfo& mi);
     void MouseOver(const MouseInfo& mi);
 
+    int GetValue();
+
   private:
     bool InsideMarker(const MouseInfo& mi);
 
@@ -42,8 +44,8 @@ class Slider : public GUIControl
     size_t _barSize;
     size_t _values;
 
-    size_t _markerPosX;
-    size_t _markerPosY;
+    size_t _zeroMarkerPosX;
+    size_t _zeroMarkerPosY;
 
     int _valueCounter;
 
