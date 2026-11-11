@@ -8,29 +8,15 @@ Button::Button(size_t charPosX,
                TG::Printer& printerRef)
   : GUIControl(printerRef), _text(text)
 {
-  //SDL_Log("<Button '%s'>", text.data());
-
   _transform.x = charPosX;
   _transform.y = charPosY;
   _transform.w = text.length() + 2;
   _transform.h = 2;
 
-  //SDL_Log("T: %d %d - %d %d",
-  //        _transform.x,
-  //        _transform.y,
-  //        _transform.w,
-  //        _transform.h);
-
   _pixelPerfect.x = charPosX * Constants::CharWidth + Constants::CharWidth / 2 + 2;
   _pixelPerfect.y = charPosY * Constants::CharHeight + Constants::CharHeight / 2;
   _pixelPerfect.w = _transform.w * Constants::CharWidth - Constants::CharWidth - 4;
   _pixelPerfect.h = _transform.h * Constants::CharHeight - 2;
-
-  //SDL_Log("PP: %d %d - %d %d",
-  //        _pixelPerfect.x,
-  //        _pixelPerfect.y,
-  //        _pixelPerfect.w,
-  //        _pixelPerfect.h);
 }
 
 // =============================================================================
@@ -77,11 +63,28 @@ void Button::Draw()
 
     if (_glyph != TG::NameCP437::FIRST)
     {
-      _printerRef.PrintPP(_transform.x + Constants::CharWidthHalf,
-                          _transform.y + 2,
-                          _glyph,
-                          _fgColor,
-                          _bgColor);
+      if (_angle != 0)
+      {
+        size_t offset = 0;
+
+        if      (_angle == 90)  offset = 6;
+        else if (_angle == 270) offset = 10;
+
+        _printerRef.DrawGlyph(_transform.x + offset,
+                              _transform.y + 2,
+                              _glyph,
+                              _fgColor,
+                              TG::Colors::None,
+                              _angle);
+      }
+      else
+      {
+        _printerRef.PrintPP(_transform.x + Constants::CharWidthHalf,
+                            _transform.y + 2,
+                            _glyph,
+                            _fgColor,
+                            _bgColor);
+      }
     }
     else
     {
@@ -103,11 +106,29 @@ void Button::Draw()
 
     if (_glyph != TG::NameCP437::FIRST)
     {
-      _printerRef.PrintPP(_transform.x + Constants::CharWidthHalf,
-                          _transform.y + 2,
-                          _glyph,
-                          _fgColor,
-                          _hoverFlag ? kHoverColor : _bgColor);
+      if (_angle != 0)
+      {
+        size_t offset = 0;
+
+        if      (_angle == 90)  offset = 6;
+        else if (_angle == 270) offset = 10;
+
+        _printerRef.DrawGlyph(_transform.x + offset,
+                              _transform.y + 2,
+                              _glyph,
+                              _fgColor,
+                              TG::Colors::None,
+                              _angle);
+      }
+      else
+      {
+        _printerRef.PrintPP(_transform.x + Constants::CharWidthHalf,
+                            _transform.y + 2,
+                            _glyph,
+                            _fgColor,
+                            _hoverFlag ? kHoverColor : _bgColor);
+
+      }
     }
     else
     {

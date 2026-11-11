@@ -27,9 +27,6 @@ Slider::Slider(int px,
 
   _valueCounter = 0;
 
-  // TODO: draw the same rotated glyphs (LARROW_1 and RARROW_1)
-  // for vertical and horizontal variant (adjust sizes as needed).
-
   if (_isVertical)
   {
     _transform.x = px;
@@ -63,14 +60,14 @@ Slider::Slider(int px,
 
     _btnLeft = std::make_unique<Button>(_transform.x - _markerSize,
                                         _transform.y,
-                                        TG::NameCP437::LARROW_1,
-                                        0,
+                                        TG::NameCP437::UARROW_1,
+                                        270,
                                         printerRef);
 
     _btnRight = std::make_unique<Button>(_transform.x + _transform.w + _markerSize,
                                          _transform.y,
-                                         TG::NameCP437::RARROW_1,
-                                         0,
+                                         TG::NameCP437::UARROW_1,
+                                         90,
                                          printerRef);
 
     _transform.h = _btnLeft->TransformPP().h;

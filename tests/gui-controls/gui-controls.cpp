@@ -32,7 +32,7 @@ void InitControls()
 {
   List = std::make_unique<ListBox<std::string>>(10, 5, 30, 10, Printer, 4);
 
-  Buttons.push_back(
+  Buttons.emplace_back(
     std::make_unique<Button>(0, 0, " + ", Printer)
   );
 
@@ -42,7 +42,7 @@ void InitControls()
     List->Add(std::format("Item {}", Counter));
   };
 
-  Buttons.push_back(
+  Buttons.emplace_back(
     std::make_unique<Button>(0, 4, " - ", Printer)
   );
 
@@ -50,6 +50,10 @@ void InitControls()
   {
     Counter--;
   };
+
+  Buttons.emplace_back(
+    std::make_unique<Button>(50, 300, TG::NameCP437::UARROW_1, 90, Printer)
+  );
 
   Sliders.emplace_back(
     std::make_unique<Slider>(700, 50, 200, 10, false, Printer)
@@ -73,7 +77,10 @@ void InitControls()
     std::make_unique<Slider>(100, 200, 200, 300, true, Printer)
   );
   Sliders.emplace_back(
-    std::make_unique<Slider>(200, 600, 400, 600, false, Printer, false)
+    std::make_unique<Slider>(50, 600, 400, 600, false, Printer, false)
+  );
+  Sliders.emplace_back(
+    std::make_unique<Slider>(550, 600, 100, 33, false, Printer)
   );
 }
 
