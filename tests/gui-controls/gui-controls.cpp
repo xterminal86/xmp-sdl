@@ -22,8 +22,9 @@ std::vector<std::unique_ptr<Button>> Buttons;
 
 std::unique_ptr<ListBox<std::string>> List;
 
-std::unique_ptr<Slider> SliderH;
-std::unique_ptr<Slider> SliderV;
+using SliderPtr = std::unique_ptr<Slider>;
+
+std::vector<SliderPtr> Sliders;
 
 int64_t Counter = 0;
 
@@ -50,8 +51,30 @@ void InitControls()
     Counter--;
   };
 
-  SliderH = std::make_unique<Slider>(300, 100, 200, 10, false, Printer);
-  SliderV = std::make_unique<Slider>(700, 200, 200, 300, true, Printer);
+  Sliders.emplace_back(
+    std::make_unique<Slider>(700, 50, 200, 10, false, Printer)
+  );
+  Sliders.emplace_back(
+    std::make_unique<Slider>(700, 150, 200, 1, false, Printer)
+  );
+  Sliders.emplace_back(
+    std::make_unique<Slider>(700, 250, 200, 3, false, Printer)
+  );
+  Sliders.emplace_back(
+    std::make_unique<Slider>(700, 350, 200, 4, false, Printer)
+  );
+  Sliders.emplace_back(
+    std::make_unique<Slider>(700, 450, 200, 5, false, Printer)
+  );
+  Sliders.emplace_back(
+    std::make_unique<Slider>(700, 550, 200, 0, false, Printer)
+  );
+  Sliders.emplace_back(
+    std::make_unique<Slider>(100, 200, 200, 300, true, Printer)
+  );
+  Sliders.emplace_back(
+    std::make_unique<Slider>(200, 600, 400, 600, false, Printer, false)
+  );
 }
 
 // =============================================================================
@@ -86,8 +109,10 @@ void Draw()
                   TG::Printer::kAlignRight,
                   TG::Colors::Yellow);
 
-  SliderH->Draw();
-  SliderV->Draw();
+  for (SliderPtr& s : Sliders)
+  {
+    s->Draw();
+  }
 
   Printer.Render();
 }
@@ -241,8 +266,10 @@ int main(int argc, char* argv[])
 
             List->MouseToItemIndex(mi);
 
-            SliderH->MouseDown(mi);
-            SliderV->MouseDown(mi);
+            for (SliderPtr& s : Sliders)
+            {
+              s->MouseDown(mi);
+            }
           }
         }
         break;
@@ -260,8 +287,10 @@ int main(int argc, char* argv[])
               b->MouseUp(mi);
             }
 
-            SliderH->MouseUp(mi);
-            SliderV->MouseUp(mi);
+            for (SliderPtr& s : Sliders)
+            {
+              s->MouseUp(mi);
+            }
           }
         }
         break;
@@ -279,8 +308,10 @@ int main(int argc, char* argv[])
 
           List->SetMouseHoverFlag(mi);
 
-          SliderH->MouseOver(mi);
-          SliderV->MouseOver(mi);
+          for (SliderPtr& s : Sliders)
+          {
+            s->MouseOver(mi);
+          }
         }
         break;
 

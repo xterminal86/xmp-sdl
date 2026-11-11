@@ -18,7 +18,8 @@ class Slider : public GUIControl
            size_t barSize,
            size_t values,
            bool vertical,
-           TG::Printer& printerRef);
+           TG::Printer& printerRef,
+           bool drawArrows = true);
 
     void Draw() override;
 
@@ -49,10 +50,10 @@ class Slider : public GUIControl
 
     int _valueCounter;
 
-    size_t _scrollAmount = 1;
     size_t _scrollStep = 1;
 
     bool _isVertical;
+    bool _drawArrows;
 
     SDL_Rect _markerTransform;
 

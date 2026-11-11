@@ -7,13 +7,15 @@ Slider::Slider(int px,
                size_t barSize,
                size_t values,
                bool vertical,
-               TG::Printer& printerRef)
+               TG::Printer& printerRef,
+               bool drawArrows)
   : GUIControl(printerRef),
     _px(px),
     _py(py),
     _barSize(barSize),
     _values(values),
-    _isVertical(vertical)
+    _isVertical(vertical),
+    _drawArrows(drawArrows)
 {
   //
   // Fool's guard.
@@ -81,20 +83,14 @@ Slider::Slider(int px,
 
   if (_values != 0)
   {
-    if (_barSize > _values)
-    {
-      _scrollAmount = 1;
-      _scrollStep   = _barSize / _values;
-    }
-    else
-    {
-      _scrollAmount = _values / _barSize;
-      _scrollStep   = 1;
-    }
-
-    SDL_Log("scroll amount = %lu scroll step = %lu",
-            _scrollAmount, _scrollStep);
+    _scrollStep = (_barSize > _values) ? (_barSize / _values) : 1;
   }
+  else
+  {
+    _scrollStep = 0;
+  }
+
+  SDL_Log("step = %lu", _scrollStep);
 
   _btnLeft->OnClick = [this]()
   {
@@ -105,7 +101,7 @@ Slider::Slider(int px,
       _valueCounter = 0;
     }
 
-    _ratio = (double)_valueCounter / (double)_values;
+    _ratio = (_values != 0) ? ((double)_valueCounter / (double)_values) : 0;
 
     UpdateMarkerPos();
   };
@@ -119,7 +115,7 @@ Slider::Slider(int px,
       _valueCounter = _values;
     }
 
-    _ratio = (double)_valueCounter / (double)_values;
+    _ratio = (_values != 0) ? ((double)_valueCounter / (double)_values) : 0;
 
     UpdateMarkerPos();
   };
@@ -158,16 +154,22 @@ void Slider::Draw()
                              (_values == 0) ? TG::Colors::Black :
                              _hoverFlag ? kHoverColor : TG::Colors::Black);
 
-  _printerRef.DrawFilledRect(
-    _markerTransform.x,
-    _markerTransform.y,
-    _markerTransform.w,
-    _markerTransform.h,
-    TG::Colors::White
-  );
+  if (_values != 0)
+  {
+    _printerRef.DrawFilledRect(
+      _markerTransform.x,
+      _markerTransform.y,
+      _markerTransform.w,
+      _markerTransform.h,
+      TG::Colors::White
+    );
+  }
 
-  _btnLeft->Draw();
-  _btnRight->Draw();
+  if (_drawArrows)
+  {
+    _btnLeft->Draw();
+    _btnRight->Draw();
+  }
 
   //
   // DEBUG:
@@ -211,12 +213,15 @@ void Slider::MouseDown(const MouseInfo& mi)
 {
   GUIControl::MouseDown(mi);
 
-  _btnLeft->MouseDown(mi);
-  _btnRight->MouseDown(mi);
+  if (_drawArrows)
+  {
+    _btnLeft->MouseDown(mi);
+    _btnRight->MouseDown(mi);
+  }
 
   _markerGrabbed = InsideMarker(mi);
 
-  if (not _markerGrabbed and _mdownFlag)
+  if (_values != 0 and not _markerGrabbed and _mdownFlag)
   {
     MoveMarker(mi);
 
@@ -230,10 +235,13 @@ void Slider::MouseUp(const MouseInfo& mi)
 {
   GUIControl::MouseUp(mi);
 
-  _btnLeft->MouseUp(mi);
-  _btnRight->MouseUp(mi);
+  if (_drawArrows)
+  {
+    _btnLeft->MouseUp(mi);
+    _btnRight->MouseUp(mi);
+  }
 
-  if (_markerGrabbed)
+  if (_values != 0 and _markerGrabbed)
   {
     _markerGrabbed = false;
     AlignMarker();
@@ -247,10 +255,13 @@ void Slider::MouseOver(const MouseInfo& mi)
 {
   GUIControl::MouseOver(mi);
 
-  _btnLeft->MouseOver(mi);
-  _btnRight->MouseOver(mi);
+  if (_drawArrows)
+  {
+    _btnLeft->MouseOver(mi);
+    _btnRight->MouseOver(mi);
+  }
 
-  if (_markerGrabbed)
+  if (_values != 0 and _markerGrabbed)
   {
     MoveMarker(mi);
   }
@@ -314,15 +325,13 @@ void Slider::ClampMarker()
 
 void Slider::AlignMarker()
 {
+  // FIXME: fix snapping for edge cases and when _scrollStep != 1
   if (_isVertical)
   {
     if (_scrollStep != 1)
     {
       size_t rem = _markerTransform.y % _scrollStep;
-      if (rem != 0)
-      {
-        _markerTransform.y -= rem;
-      }
+      _markerTransform.y -= rem;
     }
   }
   else
@@ -330,12 +339,11 @@ void Slider::AlignMarker()
     if (_scrollStep != 1)
     {
       size_t rem = _markerTransform.x % _scrollStep;
-      if (rem != 0)
-      {
-        _markerTransform.x -= rem;
-      }
+      _markerTransform.x -= rem;
     }
   }
+
+  ClampMarker();
 }
 
 // =============================================================================
