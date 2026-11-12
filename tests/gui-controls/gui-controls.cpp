@@ -59,19 +59,19 @@ void InitControls()
     std::make_unique<Slider>(700, 50, 200, 10, false, Printer)
   );
   Sliders.emplace_back(
-    std::make_unique<Slider>(700, 150, 200, 1, false, Printer)
+    std::make_unique<Slider>(700, 150, 200, 0, false, Printer)
   );
   Sliders.emplace_back(
-    std::make_unique<Slider>(700, 250, 200, 3, false, Printer)
+    std::make_unique<Slider>(700, 250, 200, 1, false, Printer)
   );
   Sliders.emplace_back(
-    std::make_unique<Slider>(700, 350, 200, 4, false, Printer)
+    std::make_unique<Slider>(700, 350, 200, 2, false, Printer)
   );
   Sliders.emplace_back(
-    std::make_unique<Slider>(700, 450, 200, 5, false, Printer)
+    std::make_unique<Slider>(700, 450, 200, 3, false, Printer)
   );
   Sliders.emplace_back(
-    std::make_unique<Slider>(700, 550, 200, 0, false, Printer)
+    std::make_unique<Slider>(700, 550, 200, 4, false, Printer)
   );
   Sliders.emplace_back(
     std::make_unique<Slider>(100, 200, 200, 300, true, Printer)

@@ -78,19 +78,28 @@ Slider::Slider(int px,
     _pixelPerfect.h = _btnLeft->TransformPP().h;
   }
 
-  if (_values != 0)
+  switch (_values)
   {
-    _scrollStep = (_barSize > _values) ? (_barSize / _values) : 1;
-  }
-  else
-  {
-    _scrollStep = 0;
+    case 0:
+    case 1:
+      _scrollStep = 0;
+      break;
+
+    default:
+      _scrollStep = (_barSize > _values) ? (_barSize / _values) : 1;
+      break;
   }
 
-  SDL_Log("step = %lu", _scrollStep);
+  SDL_Log("_barSize = %lu, _values = %lu, step = %lu",
+          _barSize, _values, _scrollStep);
 
   _btnLeft->OnClick = [this]()
   {
+    if (_values <= 1)
+    {
+      return;
+    }
+
     _valueCounter--;
 
     if (_valueCounter < 0)
@@ -105,6 +114,11 @@ Slider::Slider(int px,
 
   _btnRight->OnClick = [this]()
   {
+    if (_values <= 1)
+    {
+      return;
+    }
+
     _valueCounter++;
 
     if (_valueCounter >= (int)_values)
@@ -117,10 +131,20 @@ Slider::Slider(int px,
     UpdateMarkerPos();
   };
 
-  _markerTransform.x = _transform.x;
-  _markerTransform.y = _transform.y;
-  _markerTransform.w = _markerSize;
-  _markerTransform.h = _markerSize;
+  if (_values == 1)
+  {
+    _markerTransform.x = _isVertical ? _transform.x : (_transform.x + _barSize / 2);
+    _markerTransform.y = _isVertical ? (_transform.y + _barSize / 2) : _transform.y;
+    _markerTransform.w = _markerSize;
+    _markerTransform.h = _markerSize;
+  }
+  else
+  {
+    _markerTransform.x = _transform.x;
+    _markerTransform.y = _transform.y;
+    _markerTransform.w = _markerSize;
+    _markerTransform.h = _markerSize;
+  }
 
   _zeroMarkerPosX = _markerTransform.x;
   _zeroMarkerPosY = _markerTransform.y;
@@ -168,15 +192,14 @@ void Slider::Draw()
     _btnRight->Draw();
   }
 
-  //
-  // DEBUG:
-  //
+#ifdef DEBUG_BUILD
+  // ---------------------------------------------------------------------------
   if (_isVertical)
   {
     _printerRef.PrintFB(
         _transform.x / Constants::CharWidth + 3
       , _transform.y / Constants::CharHeight + 1
-      , std::format("{} ({:.2f})", _valueCounter, _ratio)
+      , std::format("{} ({:.2f})", GetValue(), _ratio)
       , TG::Printer::kAlignLeft
       , TG::Colors::Yellow
     );
@@ -186,11 +209,13 @@ void Slider::Draw()
     _printerRef.PrintFB(
         _transform.x / Constants::CharWidth + 2
       , _transform.y / Constants::CharHeight - 1
-      , std::format("{} ({:.2f})", _valueCounter, _ratio)
+      , std::format("{} ({:.2f})", GetValue(), _ratio)
       , TG::Printer::kAlignLeft
       , TG::Colors::Yellow
     );
   }
+  // ---------------------------------------------------------------------------
+#endif
 }
 
 // =============================================================================
@@ -218,7 +243,7 @@ void Slider::MouseDown(const MouseInfo& mi)
 
   _markerGrabbed = InsideMarker(mi);
 
-  if (_values != 0 and not _markerGrabbed and _mdownFlag)
+  if (_values > 1 and not _markerGrabbed and _mdownFlag)
   {
     MoveMarker(mi);
 
@@ -238,7 +263,7 @@ void Slider::MouseUp(const MouseInfo& mi)
     _btnRight->MouseUp(mi);
   }
 
-  if (_values != 0 and _markerGrabbed)
+  if (_values > 1 and _markerGrabbed)
   {
     _markerGrabbed = false;
     AlignMarker();
@@ -258,7 +283,7 @@ void Slider::MouseOver(const MouseInfo& mi)
     _btnRight->MouseOver(mi);
   }
 
-  if (_values != 0 and _markerGrabbed)
+  if (_values > 1 and _markerGrabbed)
   {
     MoveMarker(mi);
   }
@@ -268,7 +293,7 @@ void Slider::MouseOver(const MouseInfo& mi)
 
 int Slider::GetValue()
 {
-  return _valueCounter;
+  return (_values == 0) ? -1 : _valueCounter;
 }
 
 // =============================================================================
@@ -327,16 +352,16 @@ void Slider::AlignMarker()
   {
     if (_scrollStep != 1)
     {
-      size_t rem = _markerTransform.y % _scrollStep;
-      _markerTransform.y -= rem;
+      size_t rem = (_markerTransform.y - _zeroMarkerPosY) / _scrollStep;
+      _markerTransform.y = _zeroMarkerPosY + rem * _scrollStep;
     }
   }
   else
   {
     if (_scrollStep != 1)
     {
-      size_t rem = _markerTransform.x % _scrollStep;
-      _markerTransform.x -= rem;
+      size_t rem = (_markerTransform.x - _zeroMarkerPosX) / _scrollStep;
+      _markerTransform.x = _zeroMarkerPosX + rem * _scrollStep;
     }
   }
 
