@@ -347,7 +347,27 @@ void Slider::ClampMarker()
 
 void Slider::AlignMarker()
 {
+  if (!_isVertical)
+  {
+    if (_scrollStep != 1)
+    {
+      size_t r = (_markerTransform.x - _zeroMarkerPosX) / _scrollStep;
+
+      SDL_Log("r = %lu", r);
+
+      if (r >= (_values - 1))
+      {
+        r = _values;
+      }
+
+      _markerTransform.x = _zeroMarkerPosX + r * _scrollStep;
+
+      SDL_Log("%d", _markerTransform.x);
+    }
+  }
+
   // FIXME: fix snapping for edge cases and when _scrollStep != 1
+  /*
   if (_isVertical)
   {
     if (_scrollStep != 1)
@@ -364,6 +384,7 @@ void Slider::AlignMarker()
       _markerTransform.x = _zeroMarkerPosX + rem * _scrollStep;
     }
   }
+  */
 
   ClampMarker();
 }
