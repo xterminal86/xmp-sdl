@@ -29,15 +29,17 @@ class Slider : public GUIControl
 
     int GetValue();
 
+    void SetEnabled(bool value);
+
   private:
     bool InsideMarker(const MouseInfo& mi);
 
     void MoveMarker(const MouseInfo& mi);
-    void ClampMarker();
 
-    void AlignMarker();
     void UpdateMarkerPos();
-    void UpdateValueCounter();
+
+    void ClampMarker();
+    void AlignMarker();
 
     int _px;
     int _py;
@@ -45,12 +47,10 @@ class Slider : public GUIControl
     size_t _barSize;
     size_t _values;
 
-    size_t _zeroMarkerPosX;
-    size_t _zeroMarkerPosY;
+    int _zeroMarkerPosX;
+    int _zeroMarkerPosY;
 
     int _valueCounter;
-
-    size_t _scrollStep = 1;
 
     bool _isVertical;
     bool _drawArrows;
@@ -64,6 +64,7 @@ class Slider : public GUIControl
     const size_t _markerSizeHalf = _markerSize / 2;
 
     bool _markerGrabbed = false;
+    bool _enabled = false;
 
     double _ratio = 0.0;
 };

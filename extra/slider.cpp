@@ -1,4 +1,5 @@
-#include "slider.h"
+﻿#include "slider.h"
+#include "utils.h"
 
 #include <format>
 
@@ -24,6 +25,8 @@ Slider::Slider(int px,
   {
     _barSize = 1;
   }
+
+  _enabled = (_values > 1);
 
   _valueCounter = 0;
 
@@ -78,24 +81,10 @@ Slider::Slider(int px,
     _pixelPerfect.h = _btnLeft->TransformPP().h;
   }
 
-  switch (_values)
-  {
-    case 0:
-    case 1:
-      _scrollStep = 0;
-      break;
-
-    default:
-      _scrollStep = (_barSize > _values) ? (_barSize / _values) : 1;
-      break;
-  }
-
-  SDL_Log("_barSize = %lu, _values = %lu, step = %lu",
-          _barSize, _values, _scrollStep);
-
+  // ---------------------------------------------------------------------------
   _btnLeft->OnClick = [this]()
   {
-    if (_values <= 1)
+    if (not _enabled)
     {
       return;
     }
@@ -107,29 +96,30 @@ Slider::Slider(int px,
       _valueCounter = 0;
     }
 
-    _ratio = (_values != 0) ? ((double)_valueCounter / (double)_values) : 0;
+    _ratio = (double)_valueCounter / (double)(_values - 1);
 
     UpdateMarkerPos();
   };
 
   _btnRight->OnClick = [this]()
   {
-    if (_values <= 1)
+    if (not _enabled)
     {
       return;
     }
 
     _valueCounter++;
 
-    if (_valueCounter >= (int)_values)
+    if (_valueCounter > (int)(_values - 1))
     {
-      _valueCounter = _values;
+      _valueCounter = _values - 1;
     }
 
-    _ratio = (_values != 0) ? ((double)_valueCounter / (double)_values) : 0;
+    _ratio = (double)_valueCounter / (double)(_values - 1);
 
     UpdateMarkerPos();
   };
+  // ---------------------------------------------------------------------------
 
   if (_values == 1)
   {
@@ -148,12 +138,44 @@ Slider::Slider(int px,
 
   _zeroMarkerPosX = _markerTransform.x;
   _zeroMarkerPosY = _markerTransform.y;
+
+  SetEnabled(_enabled);
 }
 
 // =============================================================================
 
 void Slider::Draw()
 {
+  if (not _enabled)
+  {
+    _printerRef.DrawFilledRect(_transform.x,
+                               _transform.y,
+                               (not _isVertical ?
+                                (_transform.w + _markerSize) :
+                                _transform.w),
+                               (_isVertical ?
+                                (_transform.h + _markerSize) :
+                                _transform.h),
+                               Constants::GUIDisabledColor);
+
+    _printerRef.DrawFilledRect(_transform.x + 2,
+                               _transform.y + 2,
+                               (not _isVertical ?
+                                (_transform.w - 4 + _markerSize) :
+                                _transform.w - 4),
+                               (_isVertical ?
+                                (_transform.h - 4 + _markerSize) :
+                                _transform.h - 4),
+                               TG::Colors::Black);
+    if (_drawArrows)
+    {
+      _btnLeft->Draw();
+      _btnRight->Draw();
+    }
+
+    return;
+  }
+
   _printerRef.DrawFilledRect(_transform.x,
                              _transform.y,
                              (not _isVertical ?
@@ -233,6 +255,11 @@ bool Slider::InsideMarker(const MouseInfo& mi)
 
 void Slider::MouseDown(const MouseInfo& mi)
 {
+  if (not _enabled)
+  {
+    return;
+  }
+
   GUIControl::MouseDown(mi);
 
   if (_drawArrows)
@@ -255,6 +282,11 @@ void Slider::MouseDown(const MouseInfo& mi)
 
 void Slider::MouseUp(const MouseInfo& mi)
 {
+  if (not _enabled)
+  {
+    return;
+  }
+
   GUIControl::MouseUp(mi);
 
   if (_drawArrows)
@@ -267,7 +299,6 @@ void Slider::MouseUp(const MouseInfo& mi)
   {
     _markerGrabbed = false;
     AlignMarker();
-    UpdateValueCounter();
   }
 }
 
@@ -275,6 +306,11 @@ void Slider::MouseUp(const MouseInfo& mi)
 
 void Slider::MouseOver(const MouseInfo& mi)
 {
+  if (not _enabled)
+  {
+    return;
+  }
+
   GUIControl::MouseOver(mi);
 
   if (_drawArrows)
@@ -300,99 +336,40 @@ int Slider::GetValue()
 
 void Slider::MoveMarker(const MouseInfo& mi)
 {
+  if (not _enabled)
+  {
+    return;
+  }
+
   if (_isVertical)
   {
     _markerTransform.y = mi.Y - _markerSizeHalf;
+
+    ClampMarker();
+
+    _ratio = (double)(_markerTransform.y - _zeroMarkerPosY) / (double)_transform.h;
   }
   else
   {
     _markerTransform.x = mi.X - _markerSizeHalf;
+
+    ClampMarker();
+
+    _ratio = (double)(_markerTransform.x - _zeroMarkerPosX) / (double)_transform.w;
   }
 
-  ClampMarker();
-  UpdateValueCounter();
-}
-
-// =============================================================================
-
-void Slider::ClampMarker()
-{
-  if (_isVertical)
-  {
-    if (_markerTransform.y < _transform.y)
-    {
-      _markerTransform.y = _transform.y;
-    }
-
-    if (_markerTransform.y > _transform.y + _transform.h)
-    {
-      _markerTransform.y = _transform.y + _transform.h;
-    }
-  }
-  else
-  {
-    if (_markerTransform.x < _transform.x)
-    {
-      _markerTransform.x = _transform.x;
-    }
-
-    if (_markerTransform.x > _transform.x + _transform.w)
-    {
-      _markerTransform.x = _transform.x + _transform.w;
-    }
-  }
-}
-
-// =============================================================================
-
-void Slider::AlignMarker()
-{
-  if (!_isVertical)
-  {
-    if (_scrollStep != 1)
-    {
-      size_t r = (_markerTransform.x - _zeroMarkerPosX) / _scrollStep;
-
-      SDL_Log("r = %lu", r);
-
-      if (r >= (_values - 1))
-      {
-        r = _values;
-      }
-
-      _markerTransform.x = _zeroMarkerPosX + r * _scrollStep;
-
-      SDL_Log("%d", _markerTransform.x);
-    }
-  }
-
-  // FIXME: fix snapping for edge cases and when _scrollStep != 1
-  /*
-  if (_isVertical)
-  {
-    if (_scrollStep != 1)
-    {
-      size_t rem = (_markerTransform.y - _zeroMarkerPosY) / _scrollStep;
-      _markerTransform.y = _zeroMarkerPosY + rem * _scrollStep;
-    }
-  }
-  else
-  {
-    if (_scrollStep != 1)
-    {
-      size_t rem = (_markerTransform.x - _zeroMarkerPosX) / _scrollStep;
-      _markerTransform.x = _zeroMarkerPosX + rem * _scrollStep;
-    }
-  }
-  */
-
-  ClampMarker();
+  _valueCounter = (int)(_ratio * (double)(_values - 1));
 }
 
 // =============================================================================
 
 void Slider::UpdateMarkerPos()
 {
+  if (not _enabled)
+  {
+    return;
+  }
+
   if (_isVertical)
   {
     _markerTransform.y = _zeroMarkerPosY + (int)(_ratio * (double)_transform.h);
@@ -405,20 +382,63 @@ void Slider::UpdateMarkerPos()
 
 // =============================================================================
 
-void Slider::UpdateValueCounter()
+void Slider::ClampMarker()
 {
+  if (not _enabled)
+  {
+    return;
+  }
+
   if (_isVertical)
   {
-    _ratio =
-      (double)(_markerTransform.y - _transform.y) / (double)(_transform.h);
+    if (_markerTransform.y < _zeroMarkerPosY)
+    {
+      _markerTransform.y = _zeroMarkerPosY;
+    }
+    else if (_markerTransform.y > _zeroMarkerPosY + _transform.h)
+    {
+      _markerTransform.y = _zeroMarkerPosY + _transform.h;
+    }
   }
   else
   {
-    _ratio =
-      (double)(_markerTransform.x - _transform.x) / (double)(_transform.w);
+    if (_markerTransform.x < _zeroMarkerPosX)
+    {
+      _markerTransform.x = _zeroMarkerPosX;
+    }
+    else if (_markerTransform.x > _zeroMarkerPosX + _transform.w)
+    {
+      _markerTransform.x = _zeroMarkerPosX + _transform.w;
+    }
+  }
+}
+
+// =============================================================================
+
+void Slider::AlignMarker()
+{
+  if (not _enabled)
+  {
+    return;
   }
 
-  _valueCounter = (int)(_ratio * (double)_values);
+  _ratio = (double)_valueCounter / (double)(_values - 1);
 
-  _ratio = (double)_valueCounter / (double)_values;
+  if (_isVertical)
+  {
+    _markerTransform.y = _zeroMarkerPosY + (int)(_ratio * (double)_transform.h);
+  }
+  else
+  {
+    _markerTransform.x = _zeroMarkerPosX + (int)(_ratio * (double)_transform.w);
+  }
+}
+
+// =============================================================================
+
+void Slider::SetEnabled(bool value)
+{
+  _enabled = value;
+  _btnLeft->SetEnabled(_enabled);
+  _btnRight->SetEnabled(_enabled);
 }

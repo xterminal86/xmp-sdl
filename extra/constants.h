@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <functional>
 
+#include "printer.h"
+
 using PairUU = std::pair<uint64_t, uint64_t>;
 using PairII = std::pair<int, int>;
 
@@ -30,6 +32,7 @@ namespace Constants
   extern const size_t WindowWidth;
   extern const size_t WindowHeight;
 
+  extern const uint32_t GUIDisabledColor;
 } // namespace Constants
 
 #endif // CONSTANTS_H

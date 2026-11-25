@@ -56,11 +56,6 @@ void InitControls()
   );
 
   Sliders.emplace_back(
-    std::make_unique<Slider>(700, 50, 100, 2, false, Printer)
-  );
-
-  /*
-  Sliders.emplace_back(
     std::make_unique<Slider>(700, 50, 200, 10, false, Printer)
   );
   Sliders.emplace_back(
@@ -87,7 +82,6 @@ void InitControls()
   Sliders.emplace_back(
     std::make_unique<Slider>(550, 600, 100, 33, false, Printer)
   );
-  */
 }
 
 // =============================================================================

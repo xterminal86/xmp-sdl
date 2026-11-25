@@ -40,19 +40,22 @@ Button::Button(int px,
   _pixelPerfect.y = _transform.y;
   _pixelPerfect.w = _transform.w;
   _pixelPerfect.h = _transform.h;
-
 }
 
 // =============================================================================
 
 void Button::Draw()
 {
-  _printerRef.DrawFilledRect(_pixelPerfect.x,
-                             _pixelPerfect.y,
-                             _pixelPerfect.w,
-                             _pixelPerfect.h,
-                             TG::Colors::White);
+  // Block fill.
+  _printerRef.DrawFilledRect(
+    _pixelPerfect.x,
+    _pixelPerfect.y,
+    _pixelPerfect.w,
+    _pixelPerfect.h,
+    (_enabled ? TG::Colors::White : Constants::GUIDisabledColor)
+  );
 
+  // Cut from block.
   if (_mdownFlag)
   {
     _printerRef.DrawFilledRect(_pixelPerfect.x + kButtonBorderSize,
@@ -60,41 +63,6 @@ void Button::Draw()
                                _pixelPerfect.w - kBorderSizeDoubled,
                                _pixelPerfect.h - kBorderSizeDoubled,
                                _bgColor);
-
-    if (_glyph != TG::NameCP437::FIRST)
-    {
-      if (_angle != 0)
-      {
-        size_t offset = 0;
-
-        if      (_angle == 90)  offset = 6;
-        else if (_angle == 270) offset = 10;
-
-        _printerRef.DrawGlyph(_transform.x + offset,
-                              _transform.y + 2,
-                              _glyph,
-                              _fgColor,
-                              TG::Colors::None,
-                              _angle);
-      }
-      else
-      {
-        _printerRef.PrintPP(_transform.x + Constants::CharWidthHalf,
-                            _transform.y + 2,
-                            _glyph,
-                            _fgColor,
-                            _bgColor);
-      }
-    }
-    else
-    {
-      _printerRef.PrintFB(_transform.x + 1,
-                          _transform.y + 1,
-                          _text,
-                          TG::Printer::kAlignLeft,
-                          _fgColor,
-                          _bgColor);
-    }
   }
   else
   {
@@ -102,42 +70,50 @@ void Button::Draw()
                                _pixelPerfect.y + kButtonBorderSize,
                                _pixelPerfect.w - kBorderSizeDoubled,
                                _pixelPerfect.h - kBorderSizeDoubled,
-                               _hoverFlag ? kHoverColor : _bgColor);
+                               (_hoverFlag ? kHoverColor : _bgColor));
+  }
 
-    if (_glyph != TG::NameCP437::FIRST)
+  if (_glyph != TG::NameCP437::FIRST)
+  {
+    if (_angle != 0)
     {
-      if (_angle != 0)
-      {
-        size_t offset = 0;
+      size_t offset = 0;
 
-        if      (_angle == 90)  offset = 6;
-        else if (_angle == 270) offset = 10;
+      if      (_angle == 90)  offset = 6;
+      else if (_angle == 270) offset = 10;
 
-        _printerRef.DrawGlyph(_transform.x + offset,
-                              _transform.y + 2,
-                              _glyph,
-                              _fgColor,
-                              TG::Colors::None,
-                              _angle);
-      }
-      else
-      {
-        _printerRef.PrintPP(_transform.x + Constants::CharWidthHalf,
+      _printerRef.DrawGlyph(_transform.x + offset,
                             _transform.y + 2,
                             _glyph,
-                            _fgColor,
-                            _hoverFlag ? kHoverColor : _bgColor);
-
-      }
+                            (_enabled ? _fgColor : Constants::GUIDisabledColor),
+                            TG::Colors::None,
+                            _angle);
     }
     else
     {
-      _printerRef.PrintFB(_transform.x + 1,
-                          _transform.y + 1,
-                          _text,
-                          TG::Printer::kAlignLeft,
+      _printerRef.PrintPP(_transform.x + Constants::CharWidthHalf,
+                          _transform.y + 2,
+                          _glyph,
                           _fgColor,
-                          _hoverFlag ? kHoverColor : _bgColor);
+                          _bgColor);
     }
   }
+  else
+  {
+    _printerRef.PrintFB(
+      _transform.x + 1,
+      _transform.y + 1,
+      _text,
+      TG::Printer::kAlignLeft,
+      _fgColor,
+      ( (_hoverFlag and not _mdownFlag) ? kHoverColor : _bgColor )
+    );
+  }
+}
+
+// =============================================================================
+
+void Button::SetEnabled(bool value)
+{
+  _enabled = value;
 }

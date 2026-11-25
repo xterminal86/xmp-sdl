@@ -22,4 +22,6 @@ namespace Constants
   const size_t WindowWidth  = WindowCharWidth  * CharWidth;
   const size_t WindowHeight = WindowCharHeight * CharHeight;
 
+  const uint32_t GUIDisabledColor = TG::Colors::ShadesOfGrey::Five;
+
 } // namespace Constants
