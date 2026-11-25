@@ -358,7 +358,10 @@ void Slider::MoveMarker(const MouseInfo& mi)
     _ratio = (double)(_markerTransform.x - _zeroMarkerPosX) / (double)_transform.w;
   }
 
-  _valueCounter = (int)(_ratio * (double)(_values - 1));
+  //_valueCounter = (int)(_ratio * (double)(_values - 1));
+
+  // Seems to be working.
+  _valueCounter = (int)std::round(_ratio * (double)(_values - 1));
 }
 
 // =============================================================================
