@@ -39,13 +39,13 @@ Slider::Slider(int px,
     _btnLeft = std::make_unique<Button>(_transform.x,
                                         _transform.y  - _markerSize,
                                         TG::NameCP437::UARROW_1,
-                                        0,
+                                        GlyphRotation::A_0,
                                         printerRef);
 
     _btnRight = std::make_unique<Button>(_transform.x,
                                          _transform.y  + _transform.h + _markerSize,
                                          TG::NameCP437::DARROW_1,
-                                         0,
+                                         GlyphRotation::A_0,
                                          printerRef);
 
     _transform.w = _btnLeft->TransformPP().w;
@@ -64,13 +64,13 @@ Slider::Slider(int px,
     _btnLeft = std::make_unique<Button>(_transform.x - _markerSize,
                                         _transform.y,
                                         TG::NameCP437::UARROW_1,
-                                        270,
+                                        GlyphRotation::A_270,
                                         printerRef);
 
     _btnRight = std::make_unique<Button>(_transform.x + _transform.w + _markerSize,
                                          _transform.y,
                                          TG::NameCP437::UARROW_1,
-                                         90,
+                                         GlyphRotation::A_90,
                                          printerRef);
 
     _transform.h = _btnLeft->TransformPP().h;

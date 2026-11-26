@@ -8,6 +8,14 @@
 class GUIControl
 {
   public:
+    enum class GlyphRotation
+    {
+        A_0   = 0
+      , A_90  = 90
+      , A_180 = 180
+      , A_270 = 270
+    };
+
     GUIControl(TG::Printer& printerRef);
     virtual ~GUIControl();
 

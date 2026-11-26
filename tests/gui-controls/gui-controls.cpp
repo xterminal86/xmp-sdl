@@ -53,7 +53,9 @@ void InitControls()
   };
 
   Buttons.emplace_back(
-    std::make_unique<Button>(50, 300, TG::NameCP437::UARROW_1, 90, Printer)
+    std::make_unique<Button>(
+      50, 300, TG::NameCP437::UARROW_1, GUIControl::GlyphRotation::A_90, Printer
+    )
   );
 
   Buttons.emplace_back(
@@ -79,19 +81,27 @@ void InitControls()
   };
 
   Buttons.emplace_back(
-    std::make_unique<ToggleButton>(500, 500, TG::NameCP437::HEART, 0, Printer)
+    std::make_unique<ToggleButton>(
+      500, 500, TG::NameCP437::HEART, GUIControl::GlyphRotation::A_0, Printer
+    )
   );
 
   Buttons.emplace_back(
-    std::make_unique<ToggleButton>(550, 500, TG::NameCP437::DIAMOND, 0, Printer)
+    std::make_unique<ToggleButton>(
+      550, 500, TG::NameCP437::DIAMOND, GUIControl::GlyphRotation::A_0, Printer
+    )
   );
 
   Buttons.emplace_back(
-    std::make_unique<ToggleButton>(600, 500, TG::NameCP437::CLUB, 0, Printer)
+    std::make_unique<ToggleButton>(
+      600, 500, TG::NameCP437::CLUB, GUIControl::GlyphRotation::A_0, Printer
+    )
   );
 
   Buttons.emplace_back(
-    std::make_unique<ToggleButton>(650, 500, TG::NameCP437::SPADE, 0, Printer)
+    std::make_unique<ToggleButton>(
+      650, 500, TG::NameCP437::SPADE, GUIControl::GlyphRotation::A_0, Printer
+    )
   );
 
   Sliders.emplace_back(

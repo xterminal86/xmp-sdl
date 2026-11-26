@@ -19,7 +19,7 @@ class ToggleButton : public GUIControl
     ToggleButton(int px,
                  int py,
                  TG::NameCP437 glyph,
-                 uint16_t angle,
+                 GlyphRotation angle,
                  TG::Printer& printerRef,
                  bool initialOn = false);
 
@@ -36,7 +36,7 @@ class ToggleButton : public GUIControl
 
     TG::NameCP437 _glyph = TG::NameCP437::FIRST;
 
-    uint16_t _angle = 0;
+    GlyphRotation _angle = GlyphRotation::A_0;
 
     const size_t kButtonBorderSize = 2;
     const size_t kBorderSizeDoubled = kButtonBorderSize * 2;

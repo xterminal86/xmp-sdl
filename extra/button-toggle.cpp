@@ -29,7 +29,7 @@ ToggleButton::ToggleButton(size_t charPosX,
 ToggleButton::ToggleButton(int px,
                            int py,
                            TG::NameCP437 glyph,
-                           uint16_t angle,
+                           GlyphRotation angle,
                            TG::Printer& printerRef,
                            bool initialOn)
   : GUIControl(printerRef), _glyph(glyph), _angle(angle)
@@ -75,12 +75,12 @@ void ToggleButton::DrawDisabled()
 
   if (_glyph != TG::NameCP437::FIRST)
   {
-    if (_angle != 0)
+    if (_angle != GlyphRotation::A_0)
     {
       size_t offset = 0;
 
-      if      (_angle == 90)  offset = 6;
-      else if (_angle == 270) offset = 10;
+      if      (_angle == GlyphRotation::A_90)  offset = 6;
+      else if (_angle == GlyphRotation::A_270) offset = 10;
 
       _printerRef.DrawGlyph(
         _transform.x + offset,
@@ -88,7 +88,7 @@ void ToggleButton::DrawDisabled()
         _glyph,
         Constants::GUIDisabledColor,
         TG::Colors::None,
-        _angle
+        (uint16_t)_angle
       );
     }
     else
@@ -152,12 +152,12 @@ void ToggleButton::DrawToggled()
 
   if (_glyph != TG::NameCP437::FIRST)
   {
-    if (_angle != 0)
+    if (_angle != GlyphRotation::A_0)
     {
       size_t offset = 0;
 
-      if      (_angle == 90)  offset = 6;
-      else if (_angle == 270) offset = 10;
+      if      (_angle == GlyphRotation::A_90)  offset = 6;
+      else if (_angle == GlyphRotation::A_270) offset = 10;
 
       if (_mdownFlag)
       {
@@ -167,7 +167,7 @@ void ToggleButton::DrawToggled()
           _glyph,
           _fgColor,
           kActionColor,
-          _angle
+          (uint16_t)_angle
         );
       }
       else
@@ -178,7 +178,7 @@ void ToggleButton::DrawToggled()
           _glyph,
           _fgColor,
           ( _hoverFlag ? kToggledHoverColor : TG::Colors::None ),
-          _angle
+          (uint16_t)_angle
         );
       }
     }
@@ -270,12 +270,12 @@ void ToggleButton::DrawUntoggled()
 
   if (_glyph != TG::NameCP437::FIRST)
   {
-    if (_angle != 0)
+    if (_angle != GlyphRotation::A_0)
     {
       size_t offset = 0;
 
-      if      (_angle == 90)  offset = 6;
-      else if (_angle == 270) offset = 10;
+      if      (_angle == GlyphRotation::A_90)  offset = 6;
+      else if (_angle == GlyphRotation::A_270) offset = 10;
 
       if (_mdownFlag)
       {
@@ -285,7 +285,7 @@ void ToggleButton::DrawUntoggled()
           _glyph,
           _fgColor,
           kActionColor,
-          _angle
+          (uint16_t)_angle
         );
       }
       else
@@ -296,7 +296,7 @@ void ToggleButton::DrawUntoggled()
           _glyph,
           _fgColor,
           ( _hoverFlag ? kToggledHoverColor : TG::Colors::None ),
-          _angle
+          (uint16_t)_angle
         );
       }
     }
