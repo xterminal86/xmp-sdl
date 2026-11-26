@@ -31,6 +31,9 @@ class GUIControl
   protected:
     bool IsMouseInside(const MouseInfo& mi);
 
+    Callback _onMouseDown;
+    Callback _onMouseUp;
+
     TG::Printer& _printerRef;
 
     SDL_Rect _transform;

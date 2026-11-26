@@ -329,7 +329,7 @@ void Slider::MouseOver(const MouseInfo& mi)
 
 int Slider::GetValue()
 {
-  return (_values == 0) ? -1 : _valueCounter;
+  return _valueCounter;
 }
 
 // =============================================================================

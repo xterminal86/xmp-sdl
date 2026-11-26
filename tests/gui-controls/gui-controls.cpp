@@ -7,6 +7,7 @@
 #include "printer.h"
 #include "constants.h"
 #include "button.h"
+#include "button-toggle.h"
 #include "slider.h"
 #include "list-box.h"
 #include "utils.h"
@@ -18,7 +19,7 @@ TG::Printer Printer;
 
 uint64_t DeltaTime = 0;
 
-std::vector<std::unique_ptr<Button>> Buttons;
+std::vector<std::unique_ptr<GUIControl>> Buttons;
 
 std::unique_ptr<ListBox<std::string>> List;
 
@@ -56,10 +57,6 @@ void InitControls()
   );
 
   Buttons.emplace_back(
-    std::make_unique<Button>(0, 14, "Test", Printer)
-  );
-
-  Buttons.emplace_back(
     std::make_unique<Button>(8, 14, "Disabled", Printer)
   );
 
@@ -70,16 +67,31 @@ void InitControls()
 
   Buttons.back()->SetEnabled(false);
 
-  Button* p = Buttons.back().get();
+  Button* btnDisabled = (Button*)Buttons.back().get();
 
-  Buttons[ Buttons.size() - 2 ]->OnClick = [p]()
+  Buttons.emplace_back(
+    std::make_unique<ToggleButton>(17, 14, "Toggler", Printer)
+  );
+
+  Buttons.back()->OnClick = [btnDisabled]()
   {
-    p->SetEnabled( not p->IsEnabled() );
+    btnDisabled->SetEnabled( not btnDisabled->IsEnabled() );
   };
 
-  // TODO:
   Buttons.emplace_back(
-    std::make_unique<Button>(17, 14, "Toggler", Printer)
+    std::make_unique<ToggleButton>(500, 500, TG::NameCP437::HEART, 0, Printer)
+  );
+
+  Buttons.emplace_back(
+    std::make_unique<ToggleButton>(550, 500, TG::NameCP437::DIAMOND, 0, Printer)
+  );
+
+  Buttons.emplace_back(
+    std::make_unique<ToggleButton>(600, 500, TG::NameCP437::CLUB, 0, Printer)
+  );
+
+  Buttons.emplace_back(
+    std::make_unique<ToggleButton>(650, 500, TG::NameCP437::SPADE, 0, Printer)
   );
 
   Sliders.emplace_back(

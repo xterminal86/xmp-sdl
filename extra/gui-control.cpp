@@ -31,6 +31,11 @@ void GUIControl::MouseDown(const MouseInfo& mi)
     _mdownFlag = true;
     _fgColor = TG::Colors::Black;
     _bgColor = TG::Colors::White;
+
+    if (_onMouseDown.target_type() != typeid(void))
+    {
+      _onMouseDown();
+    }
   }
 }
 
@@ -48,6 +53,11 @@ void GUIControl::MouseUp(const MouseInfo& mi)
     _mdownFlag = false;
     _fgColor = TG::Colors::White;
     _bgColor = TG::Colors::Black;
+
+    if (_onMouseUp.target_type() != typeid(void))
+    {
+      _onMouseUp();
+    }
 
     if (OnClick.target_type() != typeid(void))
     {
