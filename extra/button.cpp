@@ -1,4 +1,4 @@
-#include "button.h"
+﻿#include "button.h"
 
 #include "constants.h"
 
@@ -44,7 +44,7 @@ Button::Button(int px,
 
 // =============================================================================
 
-void Button::Draw()
+void Button::DrawDisabled()
 {
   // Block fill.
   _printerRef.DrawFilledRect(
@@ -52,25 +52,92 @@ void Button::Draw()
     _pixelPerfect.y,
     _pixelPerfect.w,
     _pixelPerfect.h,
-    (_enabled ? TG::Colors::White : Constants::GUIDisabledColor)
+    Constants::GUIDisabledColor
+  );
+
+  _printerRef.DrawFilledRect(
+    _pixelPerfect.x + kButtonBorderSize,
+    _pixelPerfect.y + kButtonBorderSize,
+    _pixelPerfect.w - kBorderSizeDoubled,
+    _pixelPerfect.h - kBorderSizeDoubled,
+    TG::Colors::Black
+  );
+
+  if (_glyph != TG::NameCP437::FIRST)
+  {
+    if (_angle != 0)
+    {
+      size_t offset = 0;
+
+      if      (_angle == 90)  offset = 6;
+      else if (_angle == 270) offset = 10;
+
+      _printerRef.DrawGlyph(
+        _transform.x + offset,
+        _transform.y + 2,
+        _glyph,
+        Constants::GUIDisabledColor,
+        TG::Colors::None,
+        _angle
+      );
+    }
+    else
+    {
+      _printerRef.PrintPP(
+        _transform.x + Constants::CharWidthHalf,
+        _transform.y + 2,
+        _glyph,
+        Constants::GUIDisabledColor,
+        TG::Colors::None
+      );
+    }
+  }
+  else
+  {
+    _printerRef.PrintFB(
+      _transform.x + 1,
+      _transform.y + 1,
+      _text,
+      TG::Printer::kAlignLeft,
+      Constants::GUIDisabledColor,
+      TG::Colors::None
+    );
+  }
+}
+
+// =============================================================================
+
+void Button::DrawEnabled()
+{
+  // Block fill.
+  _printerRef.DrawFilledRect(
+    _pixelPerfect.x,
+    _pixelPerfect.y,
+    _pixelPerfect.w,
+    _pixelPerfect.h,
+    TG::Colors::White
   );
 
   // Cut from block.
   if (_mdownFlag)
   {
-    _printerRef.DrawFilledRect(_pixelPerfect.x + kButtonBorderSize,
-                               _pixelPerfect.y + kButtonBorderSize,
-                               _pixelPerfect.w - kBorderSizeDoubled,
-                               _pixelPerfect.h - kBorderSizeDoubled,
-                               _bgColor);
+    _printerRef.DrawFilledRect(
+      _pixelPerfect.x + kButtonBorderSize,
+      _pixelPerfect.y + kButtonBorderSize,
+      _pixelPerfect.w - kBorderSizeDoubled,
+      _pixelPerfect.h - kBorderSizeDoubled,
+      _bgColor
+    );
   }
   else
   {
-    _printerRef.DrawFilledRect(_pixelPerfect.x + kButtonBorderSize,
-                               _pixelPerfect.y + kButtonBorderSize,
-                               _pixelPerfect.w - kBorderSizeDoubled,
-                               _pixelPerfect.h - kBorderSizeDoubled,
-                               (_hoverFlag ? kHoverColor : _bgColor));
+    _printerRef.DrawFilledRect(
+      _pixelPerfect.x + kButtonBorderSize,
+      _pixelPerfect.y + kButtonBorderSize,
+      _pixelPerfect.w - kBorderSizeDoubled,
+      _pixelPerfect.h - kBorderSizeDoubled,
+      (_hoverFlag ? kHoverColor : _bgColor)
+    );
   }
 
   if (_glyph != TG::NameCP437::FIRST)
@@ -82,20 +149,24 @@ void Button::Draw()
       if      (_angle == 90)  offset = 6;
       else if (_angle == 270) offset = 10;
 
-      _printerRef.DrawGlyph(_transform.x + offset,
-                            _transform.y + 2,
-                            _glyph,
-                            (_enabled ? _fgColor : Constants::GUIDisabledColor),
-                            TG::Colors::None,
-                            _angle);
+      _printerRef.DrawGlyph(
+        _transform.x + offset,
+        _transform.y + 2,
+        _glyph,
+        _fgColor,
+        TG::Colors::None,
+        _angle
+      );
     }
     else
     {
-      _printerRef.PrintPP(_transform.x + Constants::CharWidthHalf,
-                          _transform.y + 2,
-                          _glyph,
-                          _fgColor,
-                          _bgColor);
+      _printerRef.PrintPP(
+        _transform.x + Constants::CharWidthHalf,
+        _transform.y + 2,
+        _glyph,
+        _fgColor,
+        _bgColor
+      );
     }
   }
   else
@@ -113,7 +184,15 @@ void Button::Draw()
 
 // =============================================================================
 
-void Button::SetEnabled(bool value)
+void Button::Draw()
 {
-  _enabled = value;
+  if (not _enabled)
+  {
+    DrawDisabled();
+  }
+  else
+  {
+    DrawEnabled();
+  }
 }
+

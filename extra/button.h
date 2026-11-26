@@ -23,9 +23,10 @@ class Button : public GUIControl
 
     void Draw() override;
 
-    void SetEnabled(bool value);
-
   private:
+    void DrawDisabled();
+    void DrawEnabled();
+
     std::string _text;
 
     TG::NameCP437 _glyph = TG::NameCP437::FIRST;
@@ -34,8 +35,6 @@ class Button : public GUIControl
 
     const size_t kButtonBorderSize = 2;
     const size_t kBorderSizeDoubled = kButtonBorderSize * 2;
-
-    bool _enabled = true;
 };
 
 #endif // BUTTON_H

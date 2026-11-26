@@ -21,6 +21,11 @@ void GUIControl::Move(int px, int py)
 
 void GUIControl::MouseDown(const MouseInfo& mi)
 {
+  if (not _enabled)
+  {
+    return;
+  }
+
   if (IsMouseInside(mi))
   {
     _mdownFlag = true;
@@ -33,6 +38,11 @@ void GUIControl::MouseDown(const MouseInfo& mi)
 
 void GUIControl::MouseUp(const MouseInfo& mi)
 {
+  if (not _enabled)
+  {
+    return;
+  }
+
   if (IsMouseInside(mi) or _mdownFlag)
   {
     _mdownFlag = false;
@@ -50,6 +60,11 @@ void GUIControl::MouseUp(const MouseInfo& mi)
 
 void GUIControl::MouseOver(const MouseInfo& mi)
 {
+  if (not _enabled)
+  {
+    return;
+  }
+
   _hoverFlag = IsMouseInside(mi);
 }
 
@@ -77,4 +92,18 @@ const SDL_Rect& GUIControl::Transform()
 const SDL_Rect& GUIControl::TransformPP()
 {
   return _pixelPerfect;
+}
+
+// =============================================================================
+
+void GUIControl::SetEnabled(bool value)
+{
+  _enabled = value;
+}
+
+// =============================================================================
+
+bool GUIControl::IsEnabled()
+{
+  return _enabled;
 }

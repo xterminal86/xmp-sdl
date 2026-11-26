@@ -30,7 +30,7 @@ int64_t Counter = 0;
 
 void InitControls()
 {
-  List = std::make_unique<ListBox<std::string>>(10, 5, 30, 10, Printer, 4);
+  List = std::make_unique<ListBox<std::string>>(10, 0, 30, 10, Printer, 4);
 
   Buttons.emplace_back(
     std::make_unique<Button>(0, 0, " + ", Printer)
@@ -53,6 +53,33 @@ void InitControls()
 
   Buttons.emplace_back(
     std::make_unique<Button>(50, 300, TG::NameCP437::UARROW_1, 90, Printer)
+  );
+
+  Buttons.emplace_back(
+    std::make_unique<Button>(0, 14, "Test", Printer)
+  );
+
+  Buttons.emplace_back(
+    std::make_unique<Button>(8, 14, "Disabled", Printer)
+  );
+
+  Buttons.back()->OnClick = []()
+  {
+    SDL_Log("Disabled button callback");
+  };
+
+  Buttons.back()->SetEnabled(false);
+
+  Button* p = Buttons.back().get();
+
+  Buttons[ Buttons.size() - 2 ]->OnClick = [p]()
+  {
+    p->SetEnabled( not p->IsEnabled() );
+  };
+
+  // TODO:
+  Buttons.emplace_back(
+    std::make_unique<Button>(17, 14, "Toggler", Printer)
   );
 
   Sliders.emplace_back(

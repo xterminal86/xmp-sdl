@@ -29,7 +29,7 @@ class Slider : public GUIControl
 
     int GetValue();
 
-    void SetEnabled(bool value);
+    void SetEnabled(bool value) override;
 
   private:
     bool InsideMarker(const MouseInfo& mi);
@@ -64,7 +64,6 @@ class Slider : public GUIControl
     const size_t _markerSizeHalf = _markerSize / 2;
 
     bool _markerGrabbed = false;
-    bool _enabled = false;
 
     double _ratio = 0.0;
 };

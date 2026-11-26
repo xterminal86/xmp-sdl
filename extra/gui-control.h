@@ -24,6 +24,10 @@ class GUIControl
     const SDL_Rect& Transform();
     const SDL_Rect& TransformPP();
 
+    virtual void SetEnabled(bool value);
+
+    bool IsEnabled();
+
   protected:
     bool IsMouseInside(const MouseInfo& mi);
 
@@ -39,6 +43,8 @@ class GUIControl
     bool _mdownFlag = false;
 
     const uint32_t kHoverColor = TG::Colors::ShadesOfGrey::Five;
+
+    bool _enabled = true;
 };
 
 #endif // GUICONTROL_H
